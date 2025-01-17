@@ -1,1 +1,0 @@
-{"version":3,"file":"telegramBot.js","sourceRoot":"","sources":["../../../src/platforms/telegram/telegramBot.ts"],"names":[],"mappings":";;AAAA,gDAKC;AALM,KAAK,UAAU,kBAAkB;IACpC,OAAO,CAAC,GAAG,CAAC,8BAA8B,CAAC,CAAC;IAC5C,uCAAuC;IACvC,+EAA+E;IAC/E,OAAO,CAAC,GAAG,CAAC,4BAA4B,CAAC,CAAC;AAC9C,CAAC"}

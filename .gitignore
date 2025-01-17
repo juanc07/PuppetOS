@@ -1,2 +1,42 @@
+# Node.js and TypeScript specific files
 node_modules/
+dist/
+build/
+
+# IDE and OS generated files
+.vscode/
+.idea/
+
+# TypeScript config cache
+*.tsbuildinfo
+
+# Log files
+*.log
+
+# Dependency directories
+jspm_packages/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Compilation artifacts - adjust if your build system uses different directories or file extensions
+*.js
+*.js.map
+*.d.ts
+
+# Optional: ignore source map files if not needed
+*.map
+
+# Test coverage reports
+coverage/
+
+# Yarn specific
+.yarn/
+
+# Environment files (for security reasons, don't commit these)
 .env
+
+# Package lock files
+package-lock.json
+yarn.lock
