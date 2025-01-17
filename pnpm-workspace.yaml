@@ -1,0 +1,4 @@
+packages:
+  - "src/**" # Includes all modules in `src`
+  - "plugins/**" # Includes all plugins
+  - "tests/**" # Includes test modules

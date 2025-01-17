@@ -1,0 +1,36 @@
+{
+  "name": "puppetOS",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "clean": "rimraf dist",
+    "dev": "ts-node src/app.ts",
+    "dev:api": "ts-node src/server/apiServer.ts",
+    "dev:jobs": "ts-node src/server/jobRunner.ts",
+    "dev:all": "concurrently \"pnpm run dev:api\" \"pnpm run dev:jobs\"",
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "start:api": "node dist/server/apiServer.js",
+    "start:jobs": "node dist/server/jobRunner.js",
+    "start:all": "concurrently \"pnpm run start:api\" \"pnpm run start:jobs\"",
+    "test": "pnpm run test:all",
+    "test:all": "pnpm run -r test"
+  },
+  "workspaces": [
+    "plugins/**",
+    "tests/**"
+  ],
+  "dependencies": {
+    "@types/express": "^5.0.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "node-schedule": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "concurrently": "^7.6.0",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}

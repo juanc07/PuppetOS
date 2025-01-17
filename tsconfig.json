@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "typeRoots": ["./src/types", "./node_modules/@types"],
+    "target": "ES2020",               // Modern JavaScript features
+    "module": "commonjs",             // CommonJS modules for Node.js
+    "strict": true,                   // Enable all strict type checks
+    "esModuleInterop": true,          // Import CommonJS modules like ES6 modules
+    "forceConsistentCasingInFileNames": true, // Ensure consistent file naming
+    "skipLibCheck": true,             // Skip type checking of declaration files
+    "outDir": "./dist",               // Output directory for compiled JS
+    "rootDir": "./src",               // Root directory for source files
+    "moduleResolution": "node",       // Resolve modules as Node.js does
+    "resolveJsonModule": true,        // Enable importing JSON files
+    "allowSyntheticDefaultImports": true, // Support synthetic default imports
+    "sourceMap": true,                // Generate source maps for debugging
+    "declaration": true,              // Generate .d.ts files for types
+    "declarationDir": "./dist/types"  // Output directory for .d.ts files
+  },
+  "include": ["src/**/*"],            // Include all files in src folder
+  "exclude": ["node_modules", "dist"] // Exclude unnecessary folders
+}
