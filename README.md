@@ -25,7 +25,7 @@ PuppetOS aims to:
 
 ```sh
 # Clone the repository
-git clone https://github.com/your-username/PuppetOS.git
+git clone https://github.com/juanc07/PuppetOS.git
 
 # Navigate to the project directory
 cd PuppetOS
