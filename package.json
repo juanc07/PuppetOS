@@ -7,29 +7,33 @@
     "dev": "ts-node src/app.ts",
     "dev:api": "ts-node src/server/apiServer.ts",
     "dev:jobs": "ts-node src/server/jobRunner.ts",
-    "dev:all": "concurrently \"pnpm run dev:api\" \"pnpm run dev:jobs\"",
-    "build": "tsc",
+    "dev:all": "concurrently \"pnpm run dev:api\" \"pnpm run dev:jobs\"",    
+    "build": "tsc && shx mkdir -p dist/config && shx cp -r ./src/config/* dist/config/",
     "start": "node dist/app.js",
     "start:api": "node dist/server/apiServer.js",
     "start:jobs": "node dist/server/jobRunner.js",
     "start:all": "concurrently \"pnpm run start:api\" \"pnpm run start:jobs\"",
+    "lazyStart": "pnpm clean && pnpm install && pnpm build && pnpm run start",
     "test": "pnpm run test:all",
-    "test:all": "pnpm run -r test"
+    "test:all": "pnpm run -r test",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write ."
   },
   "workspaces": [
     "plugins/**",
     "tests/**"
   ],
   "dependencies": {
-    "@types/express": "^5.0.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "node-schedule": "^2.1.1"
   },
   "devDependencies": {
+    "@types/express": "^5.0.0",
     "@types/node": "^22.10.7",
     "concurrently": "^7.6.0",
     "rimraf": "^6.0.1",
+    "shx": "^0.3.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   }

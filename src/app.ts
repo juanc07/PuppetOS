@@ -1,12 +1,18 @@
 // Entry point for PuppetOS
+import dotenv from 'dotenv';
 import { startApiServer } from './server/apiServer';
 import { startJobRunner } from './server/jobRunner';
 import { loadPlugins } from './agents/pluginSystem';
+import { initializeX } from './platforms/x';
 import { initializeDiscord } from './platforms/discord';
 import { initializeTelegram } from './platforms/telegram';
+import { Agent } from './agents/agent';
+
+// Load environment variables from .env file
+dotenv.config();
 
 // Main application class
-class PuppetOS {
+class PuppetOS {    
     private plugins: any[] = []; // Store loaded plugins
 
     constructor() {
@@ -23,6 +29,7 @@ class PuppetOS {
     // Initialize platform integrations
     private async initializePlatforms() {
         console.log('Initializing platforms...');
+        await initializeX();
         await initializeDiscord();
         await initializeTelegram();
         console.log('Platforms initialized.');
@@ -33,6 +40,13 @@ class PuppetOS {
         console.log('Starting PuppetOS...');
         await this.loadPlugins();
         await this.initializePlatforms();
+
+        const characterEnv = process.env.NODE_ENV || 'dev';
+        console.log('characterEnv',characterEnv);
+        const characterConfigPath = `./config/character.${characterEnv}.json`;
+        console.log('characterConfigPath',characterConfigPath);
+        const agent = new Agent(characterConfigPath);
+
 
         // Start API server
         await startApiServer();
