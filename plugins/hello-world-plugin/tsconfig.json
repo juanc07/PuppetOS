@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./",
+    "baseUrl": "./" // Use local base URL for resolving relative paths
+  },
+  "include": ["index.ts"],
+  "exclude": ["node_modules", "dist"]
+}

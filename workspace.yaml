@@ -1,0 +1,4 @@
+packages:
+  - "src"                # Main application
+  - "plugins/*"          # Plugins directory
+  - "shared-interfaces"  # Shared interfaces directory

@@ -1,0 +1,9 @@
+{
+    "name": "shared-interfaces",
+    "version": "1.0.0",
+    "main": "pluginInterface.ts",
+    "types": "pluginInterface.ts",
+    "scripts": {
+        "build": "tsc"
+    }
+}

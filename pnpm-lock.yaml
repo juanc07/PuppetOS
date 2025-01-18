@@ -17,6 +17,9 @@ importers:
       node-schedule:
         specifier: ^2.1.1
         version: 2.1.1
+      shared-interfaces:
+        specifier: workspace:*
+        version: link:shared-interfaces
     devDependencies:
       '@types/express':
         specifier: ^5.0.0
@@ -24,6 +27,9 @@ importers:
       '@types/node':
         specifier: ^22.10.7
         version: 22.10.7
+      '@types/node-schedule':
+        specifier: ^2.1.7
+        version: 2.1.7
       concurrently:
         specifier: ^7.6.0
         version: 7.6.0
@@ -40,7 +46,13 @@ importers:
         specifier: ^5.7.3
         version: 5.7.3
 
-  plugins/samplePlugin: {}
+  plugins/hello-world-plugin:
+    dependencies:
+      shared-interfaces:
+        specifier: workspace:*
+        version: link:../../shared-interfaces
+
+  shared-interfaces: {}
 
 packages:
 
@@ -95,6 +107,9 @@ packages:
 
   '@types/mime@1.3.5':
     resolution: {integrity: sha512-/pyBZWSLD2n0dcHE3hq8s8ZvcETHtEuF+3E7XVt0Ig2nvsVQXdghHVcEkIWjy9A0wKfTn97a/PSDYohKIlnP/w==}
+
+  '@types/node-schedule@2.1.7':
+    resolution: {integrity: sha512-G7Z3R9H7r3TowoH6D2pkzUHPhcJrDF4Jz1JOQ80AX0K2DWTHoN9VC94XzFAPNMdbW9TBzMZ3LjpFi7RYdbxtXA==}
 
   '@types/node@22.10.7':
     resolution: {integrity: sha512-V09KvXxFiutGp6B7XkpaDXlNadZxrzajcY50EuoLIpQ6WWYCSvf19lVIazzfIzQvhUN2HjX12spLojTnhuKlGg==}
@@ -788,6 +803,10 @@ snapshots:
   '@types/http-errors@2.0.4': {}
 
   '@types/mime@1.3.5': {}
+
+  '@types/node-schedule@2.1.7':
+    dependencies:
+      '@types/node': 22.10.7
 
   '@types/node@22.10.7':
     dependencies:

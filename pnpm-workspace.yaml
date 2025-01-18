@@ -1,4 +1,10 @@
 packages:
-  - "src/**" # Includes all modules in `src`
-  - "plugins/**" # Includes all plugins
-  - "tests/**" # Includes test modules
+  - "src/agents"
+  - "src/api"
+  - "src/config"
+  - "src/platforms"
+  - "src/server"
+  - "src/types"
+  - "src/utils"
+  - "plugins/hello-world-plugin"
+  - "shared-interfaces"
