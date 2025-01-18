@@ -23,6 +23,8 @@ export async function loadPlugins(): Promise<Plugin[]> {
     // Determine environment and set the entry point for plugins
     const isDevelopment = process.env.NODE_ENV === 'dev';
 
+    console.log(`PluginManager isDevelopment: ${isDevelopment}`);
+
     // List all plugin directories
     const pluginFolders = fs.readdirSync(pluginsDir).filter((folder) =>
         fs.statSync(path.join(pluginsDir, folder)).isDirectory()
