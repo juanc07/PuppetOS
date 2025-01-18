@@ -1,7 +1,7 @@
 
 # PuppetOS
 
-Welcome to **PuppetOS**, an ambitious open-source AI Agent framework designed to tackle the challenges of memory, knowledge, and plugin management in AI development.
+Welcome to **PuppetOS**, an open-source AI Agent framework designed to tackle the challenges of memory, knowledge, and plugin management in AI Agent development.
 
 ## Overview
 
@@ -10,14 +10,19 @@ PuppetOS aims to:
 - Provide dynamic **knowledge integration** where agents can learn from interactions.
 - Offer a **modular plugin system** to encourage community contributions and versatility.
 - Support both **chat-based** and **tool-based training** for accessibility and precision.
+- **Offer different functionalities** like:
+  - Buying groceries online
+  - Ordering things online
+  - Ordering food
+  - Handling other basic tasks we do on a day-to-day basis
 
-## Features
+## Target Features
 
 - **Memory Management**: Efficient long-term and real-time context management.
 - **Knowledge Growth**: Agents adapt and learn from interactions and updates.
 - **Plugin Architecture**: Easily extendable with community-developed plugins.
 - **Training Flexibility**: User-friendly chat and developer-focused tools for agent training.
-- **Platform Support**: Currently focused on Discord and Telegram, with more to come.
+- **Platform Support**: Currently focused on X, Discord and Telegram, with more to come.
 
 ## Getting Started
 
