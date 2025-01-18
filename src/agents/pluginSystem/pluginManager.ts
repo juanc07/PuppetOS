@@ -8,6 +8,9 @@ dotenv.config();
 
 const plugins: Plugin[] = [];
 
+/**
+ * Load all plugins from the plugins directory.
+ */
 export async function loadPlugins(): Promise<Plugin[]> {
     const pluginsDir = path.resolve(process.cwd(), 'plugins');
     console.log(`Discovering plugins in: ${pluginsDir}`);
@@ -17,76 +20,77 @@ export async function loadPlugins(): Promise<Plugin[]> {
         return [];
     }
 
-    // Determine file extension based on environment
+    // Determine environment and set the entry point for plugins
     const isDevelopment = process.env.NODE_ENV === 'dev';
-    const fileExtension = isDevelopment ? 'ts' : 'js';
 
-    // List directories inside the plugins folder
+    // List all plugin directories
     const pluginFolders = fs.readdirSync(pluginsDir).filter((folder) =>
         fs.statSync(path.join(pluginsDir, folder)).isDirectory()
     );
-
     console.log(`Found plugin folders: ${pluginFolders.join(', ')}`);
 
     for (const folder of pluginFolders) {
-        // Resolve plugin entry point
-        const pluginPath = path.join(pluginsDir, folder, `index.${fileExtension}`);
-        const packageJsonPath = path.join(pluginsDir, folder, 'package.json');
+        const pluginEntry = isDevelopment
+            ? path.join(pluginsDir, folder, 'index.ts') // Use TypeScript file in development
+            : path.join(pluginsDir, folder, 'dist', 'index.js'); // Use compiled JS in production
+
+        const packageJsonPath = path.join(pluginsDir, folder, 'package.json'); // Plugin metadata
 
         try {
+            // Validate presence of package.json
             if (!fs.existsSync(packageJsonPath)) {
                 console.warn(`Skipping ${folder}: Missing package.json`);
                 continue;
             }
 
-            // Load plugin metadata from package.json
+            // Load plugin metadata
             const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+            const { name, version, author, description } = packageJson;
 
-            if (!packageJson.name || !packageJson.version || !packageJson.author) {
+            if (!name || !version || !author) {
                 throw new Error(`Invalid package.json for ${folder}: Missing required fields`);
             }
 
-            if (!fs.existsSync(pluginPath)) {
-                console.warn(`Skipping ${folder}: Missing entry file (${pluginPath})`);
+            // Validate plugin entry file
+            if (!fs.existsSync(pluginEntry)) {
+                console.warn(`Skipping ${folder}: Missing entry file (${pluginEntry})`);
                 continue;
             }
 
-            // Dynamically load the plugin
-            const pluginModule = require(pluginPath);
+            // Dynamically import the plugin
+            const pluginModule = require(pluginEntry);
             const plugin: Plugin = pluginModule.default || pluginModule;
 
-            // Validate the plugin structure
+            // Ensure the plugin meets required structure
             if (!plugin.initialize) {
-                throw new Error(`Invalid plugin at ${pluginPath}: Missing initialize method.`);
+                throw new Error(`Invalid plugin at ${pluginEntry}: Missing initialize method.`);
             }
 
-            // Add metadata from package.json to the plugin
-            plugin.name = packageJson.name;
-            plugin.version = packageJson.version;
-            plugin.author = packageJson.author;
-            plugin.description = packageJson.description;
+            // Assign metadata to plugin
+            plugin.name = name;
+            plugin.version = version;
+            plugin.author = author;
+            plugin.description = description;
 
             console.log(`Discovered plugin: ${plugin.name}`);
             plugins.push(plugin);
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            console.error(`Failed to load plugin from ${folder}:`, errorMessage);
+            console.error(`Failed to load plugin from ${folder}:`, error instanceof Error ? error.message : error);
         }
     }
 
-    // Initialize all loaded plugins
+    // Initialize all discovered plugins
     console.log('Initializing plugins...');
-    plugins.forEach((plugin) => {
+    for (const plugin of plugins) {
         try {
             plugin.initialize();
             console.log(`Initialized plugin: ${plugin.name}`);
             plugin.test();
             console.log(`test plugin: ${plugin.name}`);
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            console.error(`Error initializing plugin: ${plugin.name}`, errorMessage);
+            console.error(`Error initializing plugin: ${plugin.name}`, error instanceof Error ? error.message : error);
         }
-    });
+    }
 
     return plugins;
 }
