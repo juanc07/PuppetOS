@@ -1,16 +1,17 @@
-# Hello World Plugin
+# Sample Basic Plugin
 
 ## Description
-This plugin is a simple example for PuppetOS. It prints "Hello World!" during initialization and provides an `execute` method to print it again.
+This Sample Basic Plugin is a simple example for PuppetOS. It prints "Sample Plugin initialized!" during initialization and provides an `execute` method to log "Sample Plugin execute!" It also includes a `test` method to say "Sample Plugin say Hello World!".
 
 ## How to Use
 1. Place this plugin in the `plugins` directory.
 2. Run the PuppetOS application.
-3. The plugin will say "Hello World!" when initialized.
-4. Call the `execute` method to print "Hello World!" again.
+3. The plugin will say "Sample Plugin initialized!" when initialized.
+4. Call the `execute` method to print "Sample Plugin execute!".
+5. Use the `test` method to print "Sample Plugin say Hello World!".
 
 ## Metadata
-- **Name**: Hello World Plugin
+- **Name**: Sample Plugin
 - **Version**: 1.0.0
 - **Author**: Your Name
-- **Description**: A simple plugin that says "Hello World!"
+- **Description**: A Basic Sample plugin
