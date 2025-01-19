@@ -89,6 +89,7 @@ export class Agent {
         console.log(`Mission: ${this.config.mission}`);
         console.log(`Vision: ${this.config.vision}`);
         console.log(`Socials: ${JSON.stringify(this.config.contact.socials, null, 2)}`);
+        console.log(`Wallets: ${JSON.stringify(this.config.wallets, null, 3)}`);
     }
 
     // Get responses based on personality and knowledge

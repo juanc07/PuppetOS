@@ -1,2 +1,1 @@
-export * from './xBot';
-export * from './events';
+export * from './PlatformX';

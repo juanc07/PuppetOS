@@ -1,2 +1,1 @@
-export * from './discordBot';
-export * from './events';
+export * from './PlatformDiscord';

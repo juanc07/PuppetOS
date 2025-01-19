@@ -25,7 +25,7 @@
   "include": [
     "src/**/*",
     "shared-interfaces/**/*"               // Include shared interfaces
-  ],
+, "src/platforms/telegram/PlatformTelegram/.ts"  ],
   "exclude": [
     "node_modules",                        // Exclude dependencies
     "dist",                                // Exclude output directory

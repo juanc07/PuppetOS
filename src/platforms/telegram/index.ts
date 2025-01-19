@@ -1,2 +1,1 @@
-export * from './telegramBot';
-export * from './events';
+export * from './PlatformTelegram';

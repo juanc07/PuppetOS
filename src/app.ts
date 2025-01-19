@@ -3,9 +3,7 @@ import dotenv from 'dotenv';
 import { startApiServer } from './server/apiServer';
 import { startJobRunner } from './server/jobRunner';
 import { loadPlugins } from './agents/pluginSystem';
-import { initializeX } from './platforms/x';
-import { initializeDiscord } from './platforms/discord';
-import { initializeTelegram } from './platforms/telegram';
+import { PlatformManager } from './platforms/PlatformManager';
 import { Agent } from './agents/agent';
 
 // Load environment variables from .env file
@@ -29,9 +27,9 @@ class PuppetOS {
     // Initialize platform integrations
     private async initializePlatforms() {
         console.log('Initializing platforms...');
-        await initializeX();
-        await initializeDiscord();
-        await initializeTelegram();
+        const platformManager = new PlatformManager();
+        await platformManager.initializeAll();
+        platformManager.registerAllEvents();
         console.log('Platforms initialized.');
     }
 
@@ -41,12 +39,12 @@ class PuppetOS {
         await this.loadPlugins();
         await this.initializePlatforms();
 
+        // load the character json file for dev or prod
         const characterEnv = process.env.NODE_ENV || 'dev';
         console.log('characterEnv',characterEnv);
         const characterConfigPath = `./config/character.${characterEnv}.json`;
         console.log('characterConfigPath',characterConfigPath);
         const agent = new Agent(characterConfigPath);
-
 
         // Start API server
         await startApiServer();
