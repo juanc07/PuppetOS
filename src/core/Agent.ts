@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Define the extended character interface
-interface CharacterConfig {
+export interface CharacterConfig {
     name: string;
     description: string;
     bio: string;
@@ -45,11 +45,43 @@ interface CharacterConfig {
     };
 }
 
+// Dependency interfaces
+export interface Memory {
+    // Define methods and properties for memory management
+}
+
+export interface KnowledgeBase {
+    // Define methods and properties for knowledge storage
+}
+
+export interface TrainingSystem {
+    // Define methods and properties for training system
+}
+
+export interface StateMachine {
+    // Define methods and properties for state management
+}
+
 // AI Agent class
 export class Agent {
+    private memory: Memory;
+    private knowledge: KnowledgeBase;
+    private trainingSystem: TrainingSystem;
+    private stateMachine: StateMachine;
     private config: CharacterConfig;
 
-    constructor(configPath: string) {
+    constructor(
+        memory: Memory,
+        knowledge: KnowledgeBase,
+        trainingSystem: TrainingSystem,
+        stateMachine: StateMachine,
+        configPath: string
+    ) {
+        this.memory = memory;
+        this.knowledge = knowledge;
+        this.trainingSystem = trainingSystem;
+        this.stateMachine = stateMachine;
+
         const resolvedPath = this.resolveConfigPath(configPath);
         console.log('Resolved Config Path:', resolvedPath);
 
@@ -77,8 +109,8 @@ export class Agent {
             const data = fs.readFileSync(configPath, 'utf-8');
             return JSON.parse(data);
         } catch (error) {
-            console.error("Failed to load character configuration:", error);
-            throw new Error("Character configuration not found or invalid.");
+            console.error('Failed to load character configuration:', error);
+            throw new Error('Character configuration not found or invalid.');
         }
     }
 
@@ -105,15 +137,3 @@ export class Agent {
         return this.config;
     }
 }
-
-// Environment-based configuration file selection
-const characterEnv = process.env.NODE_ENV || 'dev';
-console.log('Character Environment:', characterEnv);
-
-// Construct the path to the configuration file dynamically
-const characterConfigPath = `character.${characterEnv}.json`;
-console.log('Character Config Path:', characterConfigPath);
-
-// Export an instance of the agent with the dynamically resolved path
-const agent = new Agent(characterConfigPath);
-export default agent;

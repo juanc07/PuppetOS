@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "clean": "rimraf dist",
+    "clear:cache": "tsc --build --clean",
     "dev": "ts-node src/app.ts",
     "dev:api": "ts-node src/server/apiServer.ts",
     "dev:jobs": "ts-node src/server/jobRunner.ts",
@@ -36,6 +37,8 @@
     "@types/node": "^22.10.7",
     "@types/node-schedule": "^2.1.7",
     "concurrently": "^7.6.0",
+    "eslint": "^9.18.0",
+    "eslint-plugin-import": "^2.31.0",
     "node-schedule": "^2.1.1",
     "rimraf": "^6.0.1",
     "shx": "^0.3.4",

@@ -2,9 +2,10 @@
 import dotenv from 'dotenv';
 import { startApiServer } from './server/apiServer';
 import { startJobRunner } from './server/jobRunner';
-import { loadPlugins } from './agents/pluginSystem';
+import { PluginManager } from './core/pluginSystem/PluginManager';
 import { PlatformManager } from './platforms/PlatformManager';
-import { Agent } from './agents/agent';
+import { Agent } from './core/Agent';
+import { AgentFactory } from './core/AgentFactory';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -20,7 +21,8 @@ class PuppetOS {
     // Load plugins
     private async loadPlugins() {
         console.log('Loading plugins...');
-        this.plugins = await loadPlugins();
+        const pluginManager = new PluginManager(); // Create an instance
+        this.plugins = await pluginManager.loadPlugins();
         console.log(`Loaded ${this.plugins.length} plugins.`);
     }
 
@@ -44,7 +46,14 @@ class PuppetOS {
         console.log('characterEnv',characterEnv);
         const characterConfigPath = `./config/character.${characterEnv}.json`;
         console.log('characterConfigPath',characterConfigPath);
-        const agent = new Agent(characterConfigPath);
+        const agent = AgentFactory.createAgent(characterConfigPath);
+        console.log('Agent initialized:', agent.getCharacterInfo());
+
+
+         const character2ConfigPath = `./config/character2.${characterEnv}.json`;
+        console.log('character2ConfigPath',character2ConfigPath);
+        const agent2 = AgentFactory.createAgent(character2ConfigPath);
+        console.log('Agent 2 initialized:', agent2.getCharacterInfo());
 
         // Start API server
         await startApiServer();
