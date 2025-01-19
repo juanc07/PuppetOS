@@ -4,7 +4,6 @@ import { startApiServer } from './server/apiServer';
 import { startJobRunner } from './server/jobRunner';
 import { PluginManager } from './core/pluginSystem/PluginManager';
 import { PlatformManager } from './platforms/PlatformManager';
-import { Agent } from './core/Agent';
 import { AgentFactory } from './core/AgentFactory';
 
 // Load environment variables from .env file
@@ -44,13 +43,16 @@ class PuppetOS {
         // load the character json file for dev or prod
         const characterEnv = process.env.NODE_ENV || 'dev';
         console.log('characterEnv',characterEnv);
+
+        // test instantiating 1st agent
         const characterConfigPath = `./config/character.${characterEnv}.json`;
         console.log('characterConfigPath',characterConfigPath);
         const agent = AgentFactory.createAgent(characterConfigPath);
         console.log('Agent initialized:', agent.getCharacterInfo());
 
 
-         const character2ConfigPath = `./config/character2.${characterEnv}.json`;
+        // test instantiating 2nd agent
+        const character2ConfigPath = `./config/character2.${characterEnv}.json`;
         console.log('character2ConfigPath',character2ConfigPath);
         const agent2 = AgentFactory.createAgent(character2ConfigPath);
         console.log('Agent 2 initialized:', agent2.getCharacterInfo());
