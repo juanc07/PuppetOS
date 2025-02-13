@@ -1,4 +1,4 @@
-import { Platform } from "../platformInterface";
+import { Platform } from "../PlatformInterface";
 
 export class PlatformDiscord implements Platform {
   name: string;

@@ -1,10 +1,12 @@
+import { IStateMachine } from "src/interfaces";
+
 export interface State {
     name: string;
     onEnter?: () => void;
     onExit?: () => void;
 }
 
-export class StateMachine {
+export class StateMachine implements IStateMachine {
     private currentState: State | null;
     private states: Map<string, State>;
 

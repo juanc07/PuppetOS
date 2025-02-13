@@ -1,4 +1,4 @@
-import { Platform } from "../platformInterface";
+import { Platform } from "../PlatformInterface";
 
 export class PlatformX implements Platform {
     name: string;

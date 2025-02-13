@@ -1,9 +1,11 @@
+import { ITrainingSystem } from "src/interfaces";
+
 export type TrainingData = {
     input: string;
     output: string;
   };
   
-  export class TrainingSystem {
+  export class TrainingSystem implements ITrainingSystem {
     private trainingData: TrainingData[];
   
     constructor() {

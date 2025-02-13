@@ -1,4 +1,6 @@
-export class Memory {
+import { IMemory } from "src/interfaces";
+
+export class Memory implements IMemory {
     private shortTermMemory: Map<string, any>;
     private longTermMemory: Map<string, any>;
   

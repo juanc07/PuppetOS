@@ -3,7 +3,9 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./",
-    "baseUrl": "./" // Use local base URL for resolving relative paths
+    "baseUrl": "./", // Use local base URL for resolving relative paths
+    "declaration": true,
+    "declarationDir": "./dist/types"
   },
   "include": ["index.ts"],
   "exclude": ["node_modules", "dist"]

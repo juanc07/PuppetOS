@@ -24,6 +24,10 @@ export class PluginManager {
         // Determine environment and set the entry point for plugins
         const isDevelopment = process.env.NODE_ENV === 'dev';
 
+        if (isDevelopment) {
+            require("ts-node").register(); // Enables TypeScript execution
+        }
+
         console.log(`PluginManager isDevelopment: ${isDevelopment}`);
 
         // List all plugin directories
@@ -36,6 +40,8 @@ export class PluginManager {
             const pluginEntry = isDevelopment
                 ? path.join(pluginsDir, folder, 'index.ts') // Use TypeScript file in development
                 : path.join(pluginsDir, folder, 'dist', 'index.js'); // Use compiled JS in production
+
+            console.log(`Loading plugin from: ${pluginEntry}`);
 
             const packageJsonPath = path.join(pluginsDir, folder, 'package.json'); // Plugin metadata
 
@@ -61,7 +67,7 @@ export class PluginManager {
                 }
 
                 // Dynamically import the plugin
-                const pluginModule = require(pluginEntry);
+                const pluginModule = require(pluginEntry);                
                 const plugin: Plugin = pluginModule.default || pluginModule;
 
                 // Ensure the plugin meets required structure

@@ -1,3 +1,5 @@
+import { IMemory, IKnowledge, ITrainingSystem, IStateMachine } from "../interfaces";
+
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
@@ -45,36 +47,19 @@ export interface CharacterConfig {
     };
 }
 
-// Dependency interfaces
-export interface Memory {
-    // Define methods and properties for memory management
-}
-
-export interface KnowledgeBase {
-    // Define methods and properties for knowledge storage
-}
-
-export interface TrainingSystem {
-    // Define methods and properties for training system
-}
-
-export interface StateMachine {
-    // Define methods and properties for state management
-}
-
 // AI Agent class
 export class Agent {
-    private memory: Memory;
-    private knowledge: KnowledgeBase;
-    private trainingSystem: TrainingSystem;
-    private stateMachine: StateMachine;
+    private memory: IMemory;
+    private knowledge: IKnowledge;
+    private trainingSystem: ITrainingSystem;
+    private stateMachine: IStateMachine;
     private config: CharacterConfig;
 
     constructor(
-        memory: Memory,
-        knowledge: KnowledgeBase,
-        trainingSystem: TrainingSystem,
-        stateMachine: StateMachine,
+        memory: IMemory,
+        knowledge: IKnowledge,
+        trainingSystem: ITrainingSystem,
+        stateMachine: IStateMachine,
         configPath: string
     ) {
         this.memory = memory;

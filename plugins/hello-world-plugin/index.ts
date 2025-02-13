@@ -1,4 +1,4 @@
-import { Plugin } from 'shared-interfaces';
+import { Plugin } from "shared-interfaces";
 
 const helloWorldPlugin: Plugin = {
     name: 'Hello World Plugin',
@@ -17,3 +17,4 @@ const helloWorldPlugin: Plugin = {
 };
 
 export default helloWorldPlugin;
+module.exports = helloWorldPlugin;

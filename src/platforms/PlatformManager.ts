@@ -1,4 +1,4 @@
-import { Platform } from "./platformInterface";
+import { Platform } from "./PlatformInterface";
 import { PlatformX } from "./x";
 import { PlatformDiscord } from "./discord";
 import { PlatformTelegram } from "./telegram";

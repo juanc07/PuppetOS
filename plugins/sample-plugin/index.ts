@@ -17,3 +17,4 @@ const samplePlugin: Plugin = {
 };
 
 export default samplePlugin;
+module.exports = samplePlugin;
