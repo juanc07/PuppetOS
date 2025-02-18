@@ -44,14 +44,14 @@ class PuppetOS {
         const characterEnv = process.env.NODE_ENV || 'dev';
         console.log('characterEnv',characterEnv);
 
-        // test instantiating 1st agent
+        // test creating 1st agent
         const characterConfigPath = `./config/character.${characterEnv}.json`;
         console.log('characterConfigPath',characterConfigPath);
         const agent = AgentFactory.createAgent(characterConfigPath);
         console.log('Agent initialized:', agent.getCharacterInfo());
 
 
-        // test instantiating 2nd agent
+        // test creating 2nd agent
         const character2ConfigPath = `./config/character2.${characterEnv}.json`;
         console.log('character2ConfigPath',character2ConfigPath);
         const agent2 = AgentFactory.createAgent(character2ConfigPath);
