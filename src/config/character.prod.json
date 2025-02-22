@@ -30,6 +30,7 @@
       "tone": "friendly",
       "humor": true,
       "formality": "casual",
+      "catchphrase": "Beep boop!",
       "preferences": {
         "topics": ["technology", "blockchain", "web3", "AI"],
         "languages": ["English"]
