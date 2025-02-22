@@ -24,6 +24,7 @@
   },
   "include": [
     "src/**/*",
+    "test/**/*",
     "shared-interfaces/**/*"               // Include shared interfaces
 , "src/platforms/telegram/PlatformTelegram/.ts"  ],
   "exclude": [

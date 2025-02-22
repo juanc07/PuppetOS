@@ -56,7 +56,7 @@ export class DefaultKnowledge implements IKnowledge {
             }
         }
 
-        if (positiveCount > negativeCount + 2) {
+        if (positiveCount >= negativeCount + 2) { // Changed from > to >=
             return { tone: "friendly" as const, catchphrase: "You’re all awesome!" };
         } else if (negativeCount > positiveCount + 2) {
             return { tone: "sassy" as const, catchphrase: "Deal with it!" };
