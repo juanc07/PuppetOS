@@ -10,7 +10,7 @@ import { AgentFactory } from './core/AgentFactory';
 dotenv.config();
 
 // Main application class
-class PuppetOS {    
+class PuppetOS {
     private plugins: any[] = []; // Store loaded plugins
 
     constructor() {
@@ -42,19 +42,19 @@ class PuppetOS {
 
         // load the character json file for dev or prod
         const characterEnv = process.env.NODE_ENV || 'dev';
-        console.log('characterEnv',characterEnv);
+        console.log('characterEnv', characterEnv);
 
         // test creating 1st agent
         const characterConfigPath = `./config/character.${characterEnv}.json`;
-        console.log('characterConfigPath',characterConfigPath);
-        const agent = AgentFactory.createAgent(characterConfigPath);
+        console.log('characterConfigPath', characterConfigPath);
+        const agent = await AgentFactory.createAgent(characterConfigPath);
         console.log('Agent initialized:', agent.getCharacterInfo());
 
 
         // test creating 2nd agent
         const character2ConfigPath = `./config/character2.${characterEnv}.json`;
-        console.log('character2ConfigPath',character2ConfigPath);
-        const agent2 = AgentFactory.createAgent(character2ConfigPath);
+        console.log('character2ConfigPath', character2ConfigPath);
+        const agent2 = await AgentFactory.createAgent(character2ConfigPath);
         console.log('Agent 2 initialized:', agent2.getCharacterInfo());
 
         // Start API server
@@ -64,6 +64,22 @@ class PuppetOS {
         await startJobRunner();
 
         console.log('PuppetOS is up and running!');
+
+        console.log("knowledge test started");
+
+        console.log(await agent.handleInteraction("user1", "Discord", "I love tech"));
+        console.log("Tech Knowledge for user1:", await agent.getKnowledgeByKey("user1_tech"));
+        console.log("Blockchain Knowledge for user1:", await agent.getKnowledgeByKey("user1_blockchain"));
+
+        await agent.handleInteraction("user1", "Discord", "I love blockchain");
+        console.log("Updated Tech Knowledge for user1:", await agent.getKnowledgeByKey("user1_tech"));
+        console.log("Updated Blockchain Knowledge for user1:", await agent.getKnowledgeByKey("user1_blockchain"));
+
+        console.log("All Knowledge:", await agent.getKnowledge());
+
+        await agent.clearKnowledge();
+        console.log("Tech Knowledge after clear:", await agent.getKnowledgeByKey("user1_tech"));
+        console.log("All Knowledge after clear:", await agent.clearKnowledge());
     }
 }
 

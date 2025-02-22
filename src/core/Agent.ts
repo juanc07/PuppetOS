@@ -61,21 +61,35 @@ export class Agent {
     for (const topic of topics) {
       if (input.toLowerCase().includes(topic) && this.stateManager.isOpenToTopic(topic)) {
         response += `Love chatting about ${topic}! `;
+        await this.knowledge.addKnowledge(`${userId}_${topic}`, `User ${userId} likes ${topic}`);
         break;
       }
     }
 
     if (!talkative) response = response.trim() + " That’s all for now.";
     else {
-      const knowledge = this.stateManager.getKnowledge();
-      if (knowledge.length > 0) {
-        const randomFact = knowledge[Math.floor(Math.random() * knowledge.length)];
+      const userKnowledge = await this.knowledge.getKnowledgeByKey(`${userId}_tech`); // Example key
+      if (userKnowledge.length > 0) {
+        const randomFact = userKnowledge[Math.floor(Math.random() * userKnowledge.length)];
         response += `Fun fact: ${randomFact} `;
+      } else {
+        const generalKnowledge = await this.knowledge.getKnowledge();
+        if (generalKnowledge.length > 0) {
+          response += `Fun fact: ${generalKnowledge[0]} `;
+        }
       }
     }
 
     await this.interactionLogger.logInteraction(userId, platform, input, response);
+    await this.evolve();
     return response;
+  }
+
+  async evolve() {
+    const updates = await this.knowledge.evolvePersonality();
+    if (updates.tone) this.config.personality.tone = updates.tone;
+    if (updates.humor !== undefined) this.config.personality.humor = updates.humor;
+    if (updates.catchphrase) this.config.personality.catchphrase = updates.catchphrase;
   }
 
   // Operator control methods
@@ -98,6 +112,18 @@ export class Agent {
 
   async deleteMemory(userId: string) {
     await this.memory.deleteLongTerm(userId);
+  }
+
+  async clearKnowledge() {
+    await this.knowledge.clearKnowledge();
+  }
+
+  async getKnowledgeByKey(key: string) {
+    return await this.knowledge.getKnowledgeByKey(key);
+  }
+
+  async getKnowledge():Promise<string[]> {
+    return await this.knowledge.getKnowledge();
   }
 
   // Get responses based on personality and knowledge

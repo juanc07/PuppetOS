@@ -1,6 +1,6 @@
 import { Agent } from './Agent';
 import { SimpleMemory } from './memory/SimpleMemory';
-import { Knowledge } from './knowledge/Knowledge';
+import { DefaultKnowledge } from './knowledge/DefaultKnowledge';
 import { TrainingSystem } from './trainingSystem/TrainingSystem';
 import { DefaultStateManager } from './stateManager/DefaultStateManager';
 import { InfluencerLogger } from './logger/InfluencerLogger';
@@ -14,7 +14,7 @@ dotenv.config();
 
 
 export class AgentFactory {
-    static createAgent(configPath: string): Agent {
+    static async  createAgent(configPath: string): Promise<Agent> {
         const resolvedPath = this.resolveConfigPath(configPath);
         console.log('Resolved Config Path:', resolvedPath);
 
@@ -25,11 +25,11 @@ export class AgentFactory {
 
         const config = this.loadConfig(resolvedPath);
 
-        const memory = new SimpleMemory();
-        const knowledge = new Knowledge();
+        const memory = new SimpleMemory();        
         const trainingSystem = new TrainingSystem();
         const stateMachine = new DefaultStateManager(memory, config);
-        const influencerLogger = new InfluencerLogger(memory);
+        const influencerLogger = await InfluencerLogger.create(memory);
+        const knowledge = new DefaultKnowledge(memory,influencerLogger);
 
         return new Agent(memory, knowledge, trainingSystem, stateMachine,influencerLogger, config);
     }

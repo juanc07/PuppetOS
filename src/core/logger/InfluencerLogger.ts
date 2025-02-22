@@ -6,12 +6,18 @@ export class InfluencerLogger implements IInteractionLogger {
   private memory: IMemory;
   private embedder: any;
 
-  constructor(memory: IMemory) {
+  private constructor(memory: IMemory) {
     this.memory = memory;
-    this.initEmbedder();
+    // Don't call initEmbedder here; handled in create
   }
 
-  async initEmbedder() {
+  static async create(memory: IMemory): Promise<InfluencerLogger> {
+    const logger = new InfluencerLogger(memory);
+    await logger.initEmbedder(); // Wait for embedder to be ready
+    return logger;
+  }
+
+  private async initEmbedder() {
     this.embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
   }
 
@@ -22,7 +28,7 @@ export class InfluencerLogger implements IInteractionLogger {
       platform,
       input,
       response,
-      embedding: Buffer.from(embedding.data).toString("base64"), // Store as string
+      embedding: Buffer.from(embedding.data).toString("base64"),
       timestamp: new Date().toISOString(),
     };
     const existingLogs = (await this.memory.getLongTerm(`interactions_${userId}`)) || [];
