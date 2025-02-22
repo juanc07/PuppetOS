@@ -43,3 +43,6 @@ yarn.lock
 
 # ignore data folder
 data/*
+
+# But do not ignore the folder itself
+!data/.gitkeep
