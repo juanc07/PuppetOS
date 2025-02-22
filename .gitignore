@@ -42,4 +42,4 @@ package-lock.json
 yarn.lock
 
 # ignore data folder
-data/
+data/*
