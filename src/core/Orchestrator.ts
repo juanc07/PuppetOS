@@ -2,38 +2,42 @@
 import { v4 as uuidv4 } from "uuid";
 import { EventHub, eventHub } from "./EventHub";
 import { IAgent } from "../interfaces";
+import { ActionData, ControlRule, EventPayload } from "src/interfaces/Types";
 
 class Orchestrator {
   private agents: Map<string, IAgent> = new Map();
   private eventHub: EventHub;
+  private controlRules: ControlRule[];
 
-  constructor() {
+  constructor(controlRules: ControlRule[] = []) {
     this.eventHub = eventHub;
+    this.controlRules = controlRules;
     this.setupEventListeners();
     console.log("Orchestrator initialized");
   }
 
   private setupEventListeners(): void {
-    this.eventHub.on("preAction", (payload) => {
+    this.eventHub.on("preAction", (payload: EventPayload) => {
       const { agentId, action, data } = payload;
       console.log(`Agent ${agentId} wants to ${action} with`, data);
 
-      if (action === "handleInteraction" && data?.input === "shutdown") {
-        return "cancel";
-      }
-      if (action === "evolve" && Math.random() < 0.3) {
-        return { newData: { tone: "sassy" } };
+      for (const rule of this.controlRules) {
+        if (rule.action === action && rule.condition(data)) {
+          const result = typeof rule.result === "function" ? rule.result(data) : rule.result;
+          console.log(`Rule applied: ${action} -> ${JSON.stringify(result)}`);
+          return result;
+        }
       }
       return "allow";
     });
 
-    this.eventHub.on("postAction", (payload) => {
+    this.eventHub.on("postAction", (payload: EventPayload) => {
       const { agentId, action, data } = payload;
       console.log(`Agent ${agentId} completed ${action}`, data);
       return "allow" as const;
     });
 
-    this.eventHub.on("error", (payload) => {
+    this.eventHub.on("error", (payload: EventPayload) => {
       const { agentId, action, data } = payload;
       console.error(`Agent ${agentId} errored during ${action}`, data);
       return "allow" as const;
@@ -57,7 +61,11 @@ class Orchestrator {
     }
   }
 
-  async routeMessage(message: string, agentId?: string): Promise<string> {
+  public addControlRule(rule: ControlRule): void {
+    this.controlRules.push(rule);
+  }
+
+  async routeMessage(message: string, userId: string, platform: string, agentId?: string): Promise<string> {
     if (!agentId) {
       if (this.agents.size === 0) throw new Error("No agents available");
       agentId = this.agents.keys().next().value as string;
@@ -66,32 +74,43 @@ class Orchestrator {
     const agent = this.agents.get(agentId);
     if (!agent) return "No agent available.";
 
-    const preResult = await this.eventHub.emit("preAction", {
+    const payload: EventPayload = {
       agentId,
       action: "handleInteraction",
-      data: { input: message },
+      data: { input: message, userId, platform },
       timestamp: Date.now(),
       priority: "medium",
-    });
+    };
+
+    const preResult = await this.eventHub.emit("preAction", payload);
 
     if (preResult === "cancel") return "Action canceled by orchestrator.";
-    const finalInput = preResult === "allow" || preResult === "override" ? message : (preResult as { newData: any }).newData.input;
+    const finalData = preResult === "allow" || preResult === "override"
+      ? { input: message, userId, platform }
+      : (preResult as { newData: ActionData }).newData;
 
     try {
-      const response = await agent.handleInteraction("user", "unknown", finalInput);
+      // Guard against undefined input with || ""
+      const response = await agent.handleInteraction(finalData.userId, finalData.platform, finalData.input || "");
       void this.eventHub.emit("postAction", {
         agentId,
         action: "handleInteraction",
-        data: { input: finalInput, response },
+        data: { input: finalData.input || "", userId: finalData.userId, platform: finalData.platform, response },
         timestamp: Date.now(),
         priority: "medium",
       });
       return response;
     } catch (error) {
+      const errorData: ActionData = {
+        input: message, // Include for context
+        userId,
+        platform,
+        error: error instanceof Error ? error.message : String(error),
+      };
       void this.eventHub.emit("error", {
         agentId,
         action: "handleInteraction",
-        data: { error: error instanceof Error ? error.message : String(error) },
+        data: errorData,
         timestamp: Date.now(),
         priority: "high",
       });
@@ -116,7 +135,7 @@ class Orchestrator {
         console.log("Orchestrator runtime stopped");
         return;
       }
-      const response = await this.routeMessage(input);
+      const response = await this.routeMessage(input, "cliUser", "CLI");
       console.log(`Response: ${response}`);
     });
   }

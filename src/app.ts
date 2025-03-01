@@ -5,18 +5,43 @@ import { startJobRunner } from './server/jobRunner';
 import { PluginManager } from './core/pluginSystem/PluginManager';
 import { PlatformManager } from './platforms/PlatformManager';
 import { AgentFactory } from './core/AgentFactory';
-import { Orchestrator } from "./core/Orchestrator";
+import { Orchestrator} from "./core/Orchestrator";
+import { ActionData,ControlRule } from './interfaces/Types';
 
 // Load environment variables from .env file
 dotenv.config();
 
+const controlRules = [
+    {
+      action: "handleInteraction",
+      condition: (data: ActionData) => (data.input || "").toLowerCase() === "shutdown",
+      result: "cancel" as const,
+    },
+    {
+      action: "handleInteraction",
+      condition: (data: ActionData) => (data.input || "").toLowerCase() === "hi" && data.platform === "Discord",
+      result: (data: ActionData) => ({
+        newData: {
+          input: "Hello Discord friend!",
+          userId: data.userId,
+          platform: data.platform,
+        },
+      }),
+    },
+    {
+      action: "evolve",
+      condition: (_data: ActionData) => Math.random() < 0.3,
+      result: { newData: { tone: "sassy" } },
+    },
+  ] as ControlRule[]; // Explicitly cast to ControlRule[]
+
 // Main application class
 class PuppetOS {
     private plugins: any[] = []; // Store loaded plugins
-    private orchestrator: Orchestrator;
+    private orchestrator: Orchestrator;      
 
     constructor() {
-        this.orchestrator = new Orchestrator();
+        this.orchestrator = new Orchestrator(controlRules);
         console.log('Initializing PuppetOS...');
     }
 
@@ -59,21 +84,24 @@ class PuppetOS {
     private async testAgents(agentId: string) {
         const agent = this.orchestrator.getAgent(agentId)!;
         console.log("Knowledge test started");
-
-        console.log(await this.orchestrator.routeMessage("I love tech", agentId));
+    
+        console.log(await this.orchestrator.routeMessage("I love tech", "user1", "Discord", agentId));
         console.log("Tech Knowledge for user1:", await agent.getKnowledgeByKey("user1_tech"));
         console.log("Blockchain Knowledge for user1:", await agent.getKnowledgeByKey("user1_blockchain"));
-
-        console.log(await this.orchestrator.routeMessage("I love blockchain", agentId));
+    
+        console.log(await this.orchestrator.routeMessage("I love blockchain", "user1", "Discord", agentId));
         console.log("Updated Tech Knowledge for user1:", await agent.getKnowledgeByKey("user1_tech"));
         console.log("Updated Blockchain Knowledge for user1:", await agent.getKnowledgeByKey("user1_blockchain"));
-
+    
         console.log("All Knowledge:", await agent.getKnowledge());
-
+    
+        console.log(await this.orchestrator.routeMessage("shutdown", "user1", "Discord", agentId));
+        console.log(await this.orchestrator.routeMessage("hi", "user1", "Discord", agentId));
+    
         await agent.clearKnowledge();
         console.log("Tech Knowledge after clear:", await agent.getKnowledgeByKey("user1_tech"));
         console.log("All Knowledge after clear:", await agent.getKnowledge());
-    }
+      }
 
     public async start() {
         console.log("Starting PuppetOS...");

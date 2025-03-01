@@ -1,13 +1,7 @@
+import { EventPayload } from "src/interfaces/Types";
+
 // eventHub.ts
 type EventType = "preAction" | "postAction" | "error";
-
-interface EventPayload {
-  agentId: string;
-  action: string;
-  data?: any;
-  timestamp: number;
-  priority?: "low" | "medium" | "high";
-}
 
 type EventHandler = (payload: EventPayload) => "allow" | "cancel" | "override" | { newData: any };
 

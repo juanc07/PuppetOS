@@ -1,14 +1,15 @@
+// Agent.ts
 import {
   IMemory, IKnowledge, ITrainingSystem,
   IStateManager, AgentConfig, IInteractionLogger, IAgent
 } from "../interfaces";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 import { EventHub, eventHub } from "./EventHub";
+import { ActionData, EventPayload } from "src/interfaces/Types"; // Import types
 
 // Load environment variables from `.env` file
 dotenv.config();
 
-// AI Agent class
 export class Agent implements IAgent {
   private memory: IMemory;
   private knowledge: IKnowledge;
@@ -17,7 +18,7 @@ export class Agent implements IAgent {
   private interactionLogger: IInteractionLogger;
   private config: AgentConfig;
   private eventHub: EventHub;
-  private agentId: string; // Now a proper property
+  private agentId: string;
   private isRunning: boolean = false;
 
   constructor(
@@ -38,7 +39,7 @@ export class Agent implements IAgent {
     this.eventHub = eventHubInstance || eventHub || new EventHub();
     this.agentId = ""; // Initialized empty, set in start()
   }
-  
+
   async start(agentId: string): Promise<void> {
     if (this.isRunning) return;
     this.agentId = agentId;
@@ -62,8 +63,7 @@ export class Agent implements IAgent {
     return this.eventHub;
   }
 
-  // Initialize the AI based on the configuration
-  private initialize() {
+  private initialize(): void {
     console.log(`Initializing AI: ${this.config.name}`);
     console.log(`Description: ${this.config.description}`);
     console.log(`Mission: ${this.config.mission}`);
@@ -73,21 +73,24 @@ export class Agent implements IAgent {
   }
 
   async handleInteraction(userId: string, platform: string, input: string): Promise<string> {
-
     if (!this.isRunning) throw new Error(`Agent: ${this.config.name} is not running`);
 
-    const preResult = await this.eventHub.emit("preAction", {
+    const prePayload: EventPayload = {
       agentId: this.getId(),
       action: "handleInteraction",
-      data: { userId, platform, input },
+      data: { input, userId, platform },
       timestamp: Date.now(),
       priority: "medium",
-    });
+    };
+
+    const preResult = await this.eventHub.emit("preAction", prePayload);
 
     if (preResult === "cancel") return "Action canceled.";
-    const finalInput = preResult === "allow" ? input : (preResult as { newData: any }).newData.input;
+    const finalData = preResult === "allow" || preResult === "override"
+      ? { input, userId, platform }
+      : (preResult as { newData: ActionData }).newData;
 
-    await this.stateManager.updateStates(finalInput, userId);
+    await this.stateManager.updateStates(finalData.input || "", userId);
     const affinity = await this.stateManager.getUserAffinity(userId);
     const mood = this.stateManager.getMood();
     const talkative = this.stateManager.isTalkative();
@@ -104,7 +107,7 @@ export class Agent implements IAgent {
 
     const topics = this.config.personality.preferences.topics;
     for (const topic of topics) {
-      if (input.toLowerCase().includes(topic) && this.stateManager.isOpenToTopic(topic)) {
+      if ((finalData.input || "").toLowerCase().includes(topic) && this.stateManager.isOpenToTopic(topic)) {
         response += `Love chatting about ${topic}! `;
         await this.knowledge.addKnowledge(`${userId}_${topic}`, `User ${userId} likes ${topic}`);
         break;
@@ -113,7 +116,7 @@ export class Agent implements IAgent {
 
     if (!talkative) response = response.trim() + " That’s all for now.";
     else {
-      const userKnowledge = await this.knowledge.getKnowledgeByKey(`${userId}_tech`); // Example key
+      const userKnowledge = await this.knowledge.getKnowledgeByKey(`${userId}_tech`);
       if (userKnowledge.length > 0) {
         const randomFact = userKnowledge[Math.floor(Math.random() * userKnowledge.length)];
         response += `Fun fact: ${randomFact} `;
@@ -128,71 +131,78 @@ export class Agent implements IAgent {
     await this.interactionLogger.logInteraction(userId, platform, input, response);
     await this.evolve();
 
-    await this.eventHub.emit("postAction", {
+    const postPayload: EventPayload = {
       agentId: this.getId(),
       action: "handleInteraction",
-      data: { input: finalInput, response },
+      data: { input: finalData.input || "", userId, platform, response },
       timestamp: Date.now(),
       priority: "medium",
-    });
+    };
+
+    await this.eventHub.emit("postAction", postPayload);
 
     return response;
   }
 
-  async evolve() {
+  async evolve(): Promise<void> {
     if (!this.isRunning) return;
 
-    const preResult = await this.eventHub.emit("preAction", {
+    const prePayload: EventPayload = {
       agentId: this.getId(),
       action: "evolve",
-      data: {},
+      data: { userId: "", platform: "" }, // Minimal ActionData for evolve
       timestamp: Date.now(),
       priority: "medium",
-    });
+    };
+
+    const preResult = await this.eventHub.emit("preAction", prePayload);
 
     if (preResult === "cancel") return;
-    const updates = preResult === "allow" ? await this.knowledge.evolvePersonality() : (preResult as { newData: any }).newData;
+    const updates = preResult === "allow" || preResult === "override"
+      ? await this.knowledge.evolvePersonality()
+      : (preResult as { newData: ActionData }).newData;
 
     if (updates.tone) this.config.personality.tone = updates.tone;
     if (updates.humor !== undefined) this.config.personality.humor = updates.humor;
     if (updates.catchphrase) this.config.personality.catchphrase = updates.catchphrase;
 
-    await this.eventHub.emit("postAction", {
+    const postPayload: EventPayload = {
       agentId: this.getId(),
       action: "evolve",
-      data: updates,
+      data: { userId: "", platform: "", ...updates }, // Spread updates into ActionData
       timestamp: Date.now(),
       priority: "medium",
-    });
+    };
+
+    await this.eventHub.emit("postAction", postPayload);
   }
 
-  // Operator control methods
-  setMood(mood: "happy" | "neutral" | "grumpy") {
+  setMood(mood: "happy" | "neutral" | "grumpy"): void {
     const toneMap = { happy: "friendly", neutral: "casual", grumpy: "sassy" };
     (this.stateManager as any).config.personality.tone = toneMap[mood];
   }
 
-  setTalkative(talkative: boolean) {
+  setTalkative(talkative: boolean): void {
     (this.stateManager as any).config.personality.humor = talkative;
   }
 
-  setOpenTopics(topics: string[]) {
+  setOpenTopics(topics: string[]): void {
     (this.stateManager as any).config.personality.preferences.topics = topics;
   }
 
-  getConfig() {
+  getConfig(): AgentConfig {
     return (this.stateManager as any).config;
   }
 
-  async deleteMemory(userId: string) {
+  async deleteMemory(userId: string): Promise<void> {
     await this.memory.deleteLongTerm(userId);
   }
 
-  async clearKnowledge() {
+  async clearKnowledge(): Promise<void> {
     await this.knowledge.clearKnowledge();
   }
 
-  async getKnowledgeByKey(key: string) {
+  async getKnowledgeByKey(key: string): Promise<string[]> {
     return await this.knowledge.getKnowledgeByKey(key);
   }
 
@@ -200,7 +210,6 @@ export class Agent implements IAgent {
     return await this.knowledge.getKnowledge();
   }
 
-  // Get responses based on personality and knowledge
   public getResponse(input: string): string {
     const response = this.config.knowledge.data.find((entry) =>
       input.toLowerCase().includes(entry.toLowerCase())
@@ -208,7 +217,6 @@ export class Agent implements IAgent {
     return response || "I'm not sure about that, but I'm always learning!";
   }
 
-  // Retrieve character-specific information
   public getCharacterInfo(): AgentConfig {
     return this.config;
   }
