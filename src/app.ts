@@ -131,14 +131,14 @@ class PuppetOS {
         // Setup phase
         await this.loadPlugins();
         await this.initializePlatforms();
+
         const { agentId, agentId2 } = await this.setupAgents();
-
-        //await startApiServer();
-        //await startJobRunner();        
-
         // Test phase
         //await this.testAgentsRouteMessage(agentId, agentId2);
-        await this.testAgentsMemory(agentId, agentId2);
+        //await this.testAgentsMemory(agentId, agentId2);
+
+        await startApiServer(this.orchestrator);
+        //await startJobRunner();
 
         // Runtime phase
         this.orchestrator.run();

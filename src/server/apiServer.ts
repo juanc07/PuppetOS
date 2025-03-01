@@ -1,23 +1,57 @@
-import express, { Express } from 'express'; // Import express and its types
-import { setupAgentRoutes } from './routes/agentRoutes';
-import {setupPluginRoutes} from './routes/pluginRoutes';
+// server/startApiServer.ts
+import express, { Express } from "express";
+import { Server } from "http";
+import { setupAgentRoutes } from "./routes/agentRoutes";
+import { setupPluginRoutes } from "./routes/pluginRoutes";
+import { Orchestrator } from "../core/Orchestrator";
+import path from "path";
+import dotenv from "dotenv";
 
-import dotenv from 'dotenv';
-
-// Load environment variables from .env file
 dotenv.config();
 
-const app: Express = express(); // Explicitly define app as type Express
-app.use(express.json()); // Middleware to parse JSON
+const app: Express = express();
 
-// Setup API routes
-setupAgentRoutes(app);
-// plugin api routes for testing plugin
-setupPluginRoutes(app);
+// Middleware must be before routes
+app.use(express.json({ limit: "10kb" })); // Ensure JSON parsing with a reasonable limit
+app.use(express.static(path.join(__dirname, "../public")));
 
-export async function startApiServer() {
-    const PORT = process.env.PORT;
-    app.listen(PORT, () => {
-        console.log(`API Server running at http://localhost:${PORT}`);
+let server: Server | null = null;
+
+export async function startApiServer(orchestrator: Orchestrator): Promise<void> {
+  return new Promise((resolve, reject) => {
+    console.log("Starting API server...");
+    setupAgentRoutes(app, orchestrator);
+    setupPluginRoutes(app);
+
+    const PORT = process.env.PORT || "3000";
+    server = app.listen(PORT, () => {
+      console.log(`API Server running at http://localhost:${PORT}`);
+      resolve();
     });
+
+    server.on("error", (err) => {
+      console.error("Server start error:", err);
+      reject(err);
+    });
+  });
+}
+
+export async function stopApiServer(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (server) {
+      server.close((err: Error | undefined) => {
+        if (err) {
+          console.error("Error stopping API Server:", err);
+          reject(err);
+        } else {
+          console.log("API Server stopped successfully.");
+          server = null;
+          resolve();
+        }
+      });
+    } else {
+      console.log("No active API server to stop.");
+      resolve();
+    }
+  });
 }
