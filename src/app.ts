@@ -5,6 +5,7 @@ import { startJobRunner } from './server/jobRunner';
 import { PluginManager } from './core/pluginSystem/PluginManager';
 import { PlatformManager } from './platforms/PlatformManager';
 import { AgentFactory } from './core/AgentFactory';
+import { Orchestrator } from "./core/Orchestrator";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -12,8 +13,10 @@ dotenv.config();
 // Main application class
 class PuppetOS {
     private plugins: any[] = []; // Store loaded plugins
+    private orchestrator: Orchestrator;
 
     constructor() {
+        this.orchestrator = new Orchestrator();
         console.log('Initializing PuppetOS...');
     }
 
@@ -34,44 +37,34 @@ class PuppetOS {
         console.log('Platforms initialized.');
     }
 
-    // Start the application
-    public async start() {
-        console.log('Starting PuppetOS...');
-        await this.loadPlugins();
-        await this.initializePlatforms();
+    private async setupAgents(): Promise<{ agentId: string; agentId2: string }> {
+        const characterEnv = process.env.NODE_ENV || "dev";
+        console.log("characterEnv", characterEnv);
 
-        // load the character json file for dev or prod
-        const characterEnv = process.env.NODE_ENV || 'dev';
-        console.log('characterEnv', characterEnv);
-
-        // test creating 1st agent
         const characterConfigPath = `./config/character.${characterEnv}.json`;
-        console.log('characterConfigPath', characterConfigPath);
+        console.log("characterConfigPath", characterConfigPath);
         const agent = await AgentFactory.createAgent(characterConfigPath);
-        console.log('Agent initialized:', agent.getCharacterInfo());
+        const agentId = await this.orchestrator.startAgent(agent);
+        console.log("Agent initialized:", agent.getCharacterInfo(), "with ID:", agentId);
 
-
-        // test creating 2nd agent
         const character2ConfigPath = `./config/character2.${characterEnv}.json`;
-        console.log('character2ConfigPath', character2ConfigPath);
+        console.log("character2ConfigPath", character2ConfigPath);
         const agent2 = await AgentFactory.createAgent(character2ConfigPath);
-        console.log('Agent 2 initialized:', agent2.getCharacterInfo());
+        const agentId2 = await this.orchestrator.startAgent(agent2);
+        console.log("Agent 2 initialized:", agent2.getCharacterInfo(), "with ID:", agentId2);
 
-        // Start API server
-        await startApiServer();
+        return { agentId, agentId2 };
+    }
 
-        // Start Job Runner
-        await startJobRunner();
+    private async testAgents(agentId: string) {
+        const agent = this.orchestrator.getAgent(agentId)!;
+        console.log("Knowledge test started");
 
-        console.log('PuppetOS is up and running!');
-
-        console.log("knowledge test started");
-
-        console.log(await agent.handleInteraction("user1", "Discord", "I love tech"));
+        console.log(await this.orchestrator.routeMessage("I love tech", agentId));
         console.log("Tech Knowledge for user1:", await agent.getKnowledgeByKey("user1_tech"));
         console.log("Blockchain Knowledge for user1:", await agent.getKnowledgeByKey("user1_blockchain"));
 
-        await agent.handleInteraction("user1", "Discord", "I love blockchain");
+        console.log(await this.orchestrator.routeMessage("I love blockchain", agentId));
         console.log("Updated Tech Knowledge for user1:", await agent.getKnowledgeByKey("user1_tech"));
         console.log("Updated Blockchain Knowledge for user1:", await agent.getKnowledgeByKey("user1_blockchain"));
 
@@ -79,7 +72,26 @@ class PuppetOS {
 
         await agent.clearKnowledge();
         console.log("Tech Knowledge after clear:", await agent.getKnowledgeByKey("user1_tech"));
-        console.log("All Knowledge after clear:", await agent.clearKnowledge());
+        console.log("All Knowledge after clear:", await agent.getKnowledge());
+    }
+
+    public async start() {
+        console.log("Starting PuppetOS...");
+
+        // Setup phase
+        await this.loadPlugins();
+        await this.initializePlatforms();
+        const { agentId } = await this.setupAgents();
+        await startApiServer();
+        await startJobRunner();
+
+        console.log("PuppetOS is up and running!");
+
+        // Test phase
+        await this.testAgents(agentId);
+
+        // Runtime phase
+        this.orchestrator.run();
     }
 }
 
