@@ -38,7 +38,8 @@
     },
     "settings": {
       "max_memory_context": 10,
-      "platforms": ["discord", "telegram", "web"]
-    }
+      "platforms": ["discord", "telegram", "web"]      
+    },
+    "ruleIds": ["helloBlock", "codeBoost"]
   }
   

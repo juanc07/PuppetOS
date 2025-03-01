@@ -5,7 +5,7 @@ import {
 } from "../interfaces";
 import dotenv from "dotenv";
 import { EventHub, eventHub } from "./EventHub";
-import { ActionData, EventPayload } from "src/interfaces/Types"; // Import types
+import { ActionData, EventPayload} from "src/interfaces/Types"; // Import types
 
 // Load environment variables from `.env` file
 dotenv.config();
@@ -128,8 +128,7 @@ export class Agent implements IAgent {
       }
     }
 
-    await this.interactionLogger.logInteraction(userId, platform, input, response);
-    await this.evolve();
+    await this.interactionLogger.logInteraction(userId, platform, input, response);    
 
     const postPayload: EventPayload = {
       agentId: this.getId(),
@@ -144,6 +143,7 @@ export class Agent implements IAgent {
     return response;
   }
 
+  // experimental for evolving the agent's personality
   async evolve(): Promise<void> {
     if (!this.isRunning) return;
 
@@ -200,6 +200,10 @@ export class Agent implements IAgent {
 
   async clearKnowledge(): Promise<void> {
     await this.knowledge.clearKnowledge();
+  }
+
+  async addKnowledge(key: string,value:string): Promise<void> {
+    await this.knowledge.addKnowledge(key,value);
   }
 
   async getKnowledgeByKey(key: string): Promise<string[]> {

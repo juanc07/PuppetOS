@@ -5,43 +5,27 @@ import { startJobRunner } from './server/jobRunner';
 import { PluginManager } from './core/pluginSystem/PluginManager';
 import { PlatformManager } from './platforms/PlatformManager';
 import { AgentFactory } from './core/AgentFactory';
-import { Orchestrator} from "./core/Orchestrator";
-import { ActionData,ControlRule } from './interfaces/Types';
+import { Orchestrator } from "./core/Orchestrator";
+import { ActionData, ControlRule } from './interfaces/Types';
 
 // Load environment variables from .env file
 dotenv.config();
 
-const controlRules = [
+const globalRules: ControlRule[] = [
     {
-      action: "handleInteraction",
-      condition: (data: ActionData) => (data.input || "").toLowerCase() === "shutdown",
-      result: "cancel" as const,
+        action: "handleInteraction",
+        condition: (data: ActionData) => (data.input || "").toLowerCase() === "stop",
+        result: "cancel",
     },
-    {
-      action: "handleInteraction",
-      condition: (data: ActionData) => (data.input || "").toLowerCase() === "hi" && data.platform === "Discord",
-      result: (data: ActionData) => ({
-        newData: {
-          input: "Hello Discord friend!",
-          userId: data.userId,
-          platform: data.platform,
-        },
-      }),
-    },
-    {
-      action: "evolve",
-      condition: (_data: ActionData) => Math.random() < 0.3,
-      result: { newData: { tone: "sassy" } },
-    },
-  ] as ControlRule[]; // Explicitly cast to ControlRule[]
+];
 
 // Main application class
 class PuppetOS {
     private plugins: any[] = []; // Store loaded plugins
-    private orchestrator: Orchestrator;      
+    private orchestrator: Orchestrator;
 
     constructor() {
-        this.orchestrator = new Orchestrator(controlRules);
+        this.orchestrator = new Orchestrator(globalRules);
         console.log('Initializing PuppetOS...');
     }
 
@@ -81,27 +65,65 @@ class PuppetOS {
         return { agentId, agentId2 };
     }
 
-    private async testAgents(agentId: string) {
+    private async testAgentsRouteMessage(agentId: string, agentId2: string) {
         const agent = this.orchestrator.getAgent(agentId)!;
-        console.log("Knowledge test started");
-    
-        console.log(await this.orchestrator.routeMessage("I love tech", "user1", "Discord", agentId));
-        console.log("Tech Knowledge for user1:", await agent.getKnowledgeByKey("user1_tech"));
-        console.log("Blockchain Knowledge for user1:", await agent.getKnowledgeByKey("user1_blockchain"));
-    
-        console.log(await this.orchestrator.routeMessage("I love blockchain", "user1", "Discord", agentId));
-        console.log("Updated Tech Knowledge for user1:", await agent.getKnowledgeByKey("user1_tech"));
-        console.log("Updated Blockchain Knowledge for user1:", await agent.getKnowledgeByKey("user1_blockchain"));
-    
-        console.log("All Knowledge:", await agent.getKnowledge());
-    
+        const agent2 = this.orchestrator.getAgent(agentId2)!;
+
+        // Route message tests        
+        console.log("(Agent 1) tests:");
+        console.log(await this.orchestrator.routeMessage("hello", "user1", "Discord", agentId)); // Blocked
+        console.log(await this.orchestrator.routeMessage("I love code", "user1", "Discord", agentId)); // Boosted
+
+        console.log("(Agent 2) tests:");
+        console.log(await this.orchestrator.routeMessage("bye", "user2", "Discord", agentId2)); // Blocked
+        console.log(await this.orchestrator.routeMessage("I love space", "user2", "Discord", agentId2)); // Boosted
+
+        console.log("Global rule test (both agents):");
+        console.log(await this.orchestrator.routeMessage("stop", "user1", "Discord", agentId)); // Blocked globally
+        console.log(await this.orchestrator.routeMessage("stop", "user2", "Discord", agentId2)); // Blocked globally
+
         console.log(await this.orchestrator.routeMessage("shutdown", "user1", "Discord", agentId));
-        console.log(await this.orchestrator.routeMessage("hi", "user1", "Discord", agentId));
-    
+        console.log(await this.orchestrator.routeMessage("hi", "user1", "Discord", agentId));       
+    }
+
+    private async testAgentsMemory(agentId: string,agentId2: string) {
+        const agent = this.orchestrator.getAgent(agentId)!;
+        const agent2 = this.orchestrator.getAgent(agentId2)!;    
+
+        console.log("Agent 1 Knowledge test started");
+
+        console.log("Add Tech Knowledge for user1");
+        await agent.addKnowledge("user1_tech", "I love tech")
+        console.log("Fetch Blockchain Knowledge for user1:", await agent.getKnowledgeByKey("user1_tech"));
+
+        console.log("Add Tech Knowledge for user1");
+        await agent.addKnowledge("user1_blockchain", "I love blockchain")
+        console.log("Fetch Blockchain Knowledge for user1:", await agent.getKnowledgeByKey("user1_blockchain"));
+
+        console.log("All Knowledge:", await agent.getKnowledge());
+
         await agent.clearKnowledge();
+
         console.log("Tech Knowledge after clear:", await agent.getKnowledgeByKey("user1_tech"));
         console.log("All Knowledge after clear:", await agent.getKnowledge());
-      }
+
+        console.log("Agent 2 Knowledge test started");
+
+        console.log("Add MEME Knowledge for user1");
+        await agent2.addKnowledge("user2_meme", "I love meme");
+        console.log("Fetch MEME Knowledge for user2:", await agent2.getKnowledgeByKey("user2_meme"));
+
+        console.log("Add Solana Knowledge user2");
+        await agent2.addKnowledge("user2_solana", "I love solana")
+        console.log("Fetch Solana Knowledge for user2:", await agent2.getKnowledgeByKey("user2_solana"));
+
+        console.log("Agent 2 All Knowledge:", await agent2.getKnowledge());
+
+        await agent2.clearKnowledge();
+
+        console.log("Agent2 MEME Knowledge after clear:", await agent2.getKnowledgeByKey("user2_meme"));
+        console.log("Agent2 All Knowledge after clear:", await agent2.getKnowledge());
+    }
 
     public async start() {
         console.log("Starting PuppetOS...");
@@ -109,17 +131,19 @@ class PuppetOS {
         // Setup phase
         await this.loadPlugins();
         await this.initializePlatforms();
-        const { agentId } = await this.setupAgents();
-        await startApiServer();
-        await startJobRunner();
+        const { agentId, agentId2 } = await this.setupAgents();
 
-        console.log("PuppetOS is up and running!");
+        //await startApiServer();
+        //await startJobRunner();        
 
         // Test phase
-        await this.testAgents(agentId);
+        //await this.testAgentsRouteMessage(agentId, agentId2);
+        await this.testAgentsMemory(agentId, agentId2);
 
         // Runtime phase
         this.orchestrator.run();
+
+        console.log("PuppetOS is up and running!");
     }
 }
 

@@ -14,7 +14,9 @@ export interface IAgent {
     deleteMemory(userId: string): Promise<void>;
     clearKnowledge(): Promise<void>;
     getKnowledgeByKey(key: string): Promise<string[]>;
+    addKnowledge(key: string,value:string): Promise<void>;
     getKnowledge(): Promise<string[]>;
     getResponse(input: string): string;
     getEventHub(): EventHub;
+    getCharacterInfo(): AgentConfig;
   }

@@ -1,17 +1,18 @@
 // orchestrator.ts
 import { v4 as uuidv4 } from "uuid";
 import { EventHub, eventHub } from "./EventHub";
-import { IAgent } from "../interfaces";
-import { ActionData, ControlRule, EventPayload } from "src/interfaces/Types";
+import { IAgent } from "src/interfaces";
+import { ActionData, EventPayload, ControlRule } from "src/interfaces/Types";
+import { ruleSets } from "./Rules";
 
 class Orchestrator {
   private agents: Map<string, IAgent> = new Map();
+  private agentRules: Map<string, ControlRule[]> = new Map();
   private eventHub: EventHub;
-  private controlRules: ControlRule[];
 
-  constructor(controlRules: ControlRule[] = []) {
+  constructor(globalRules: ControlRule[] = []) {
     this.eventHub = eventHub;
-    this.controlRules = controlRules;
+    this.agentRules.set("global", globalRules);
     this.setupEventListeners();
     console.log("Orchestrator initialized");
   }
@@ -21,10 +22,20 @@ class Orchestrator {
       const { agentId, action, data } = payload;
       console.log(`Agent ${agentId} wants to ${action} with`, data);
 
-      for (const rule of this.controlRules) {
+      const agentRules = this.agentRules.get(agentId) || [];
+      for (const rule of agentRules) {
         if (rule.action === action && rule.condition(data)) {
           const result = typeof rule.result === "function" ? rule.result(data) : rule.result;
-          console.log(`Rule applied: ${action} -> ${JSON.stringify(result)}`);
+          console.log(`Agent ${agentId} rule applied: ${action} -> ${JSON.stringify(result)}`);
+          return result;
+        }
+      }
+
+      const globalRules = this.agentRules.get("global") || [];
+      for (const rule of globalRules) {
+        if (rule.action === action && rule.condition(data)) {
+          const result = typeof rule.result === "function" ? rule.result(data) : rule.result;
+          console.log(`Global rule applied: ${action} -> ${JSON.stringify(result)}`);
           return result;
         }
       }
@@ -48,7 +59,16 @@ class Orchestrator {
     const agentId = uuidv4();
     await agent.start(agentId);
     this.agents.set(agentId, agent);
-    console.log(`Started agent ${agentId}`);
+
+    const config = agent.getCharacterInfo();
+    const agentRules = (config.ruleIds || []).map(id => {
+      const rule = ruleSets[id];
+      if (!rule) throw new Error(`Unknown rule ID: ${id} for agent ${agentId}`);
+      return rule;
+    });
+    this.agentRules.set(agentId, agentRules);
+
+    console.log(`Started agent ${agentId} with rules: ${config.ruleIds || "none"}`);
     return agentId;
   }
 
@@ -57,12 +77,15 @@ class Orchestrator {
     if (agent) {
       await agent.stop();
       this.agents.delete(agentId);
+      this.agentRules.delete(agentId);
       console.log(`Stopped agent ${agentId}`);
     }
   }
 
-  public addControlRule(rule: ControlRule): void {
-    this.controlRules.push(rule);
+  public addAgentRule(agentId: string, rule: ControlRule): void {
+    const rules = this.agentRules.get(agentId) || [];
+    rules.push(rule);
+    this.agentRules.set(agentId, rules);
   }
 
   async routeMessage(message: string, userId: string, platform: string, agentId?: string): Promise<string> {
@@ -90,7 +113,6 @@ class Orchestrator {
       : (preResult as { newData: ActionData }).newData;
 
     try {
-      // Guard against undefined input with || ""
       const response = await agent.handleInteraction(finalData.userId, finalData.platform, finalData.input || "");
       void this.eventHub.emit("postAction", {
         agentId,
@@ -102,7 +124,7 @@ class Orchestrator {
       return response;
     } catch (error) {
       const errorData: ActionData = {
-        input: message, // Include for context
+        input: message,
         userId,
         platform,
         error: error instanceof Error ? error.message : String(error),

@@ -19,4 +19,5 @@ export interface AgentConfig {
       preferences: { topics: string[]; languages: string[] };
     };
     settings: { max_memory_context: number; platforms: string[] };
+    ruleIds?: string[];
   } 
