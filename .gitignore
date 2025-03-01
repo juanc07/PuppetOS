@@ -37,6 +37,12 @@ coverage/
 # Environment files (for security reasons, don't commit these)
 .env
 
+# Local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
 # Package lock files
 package-lock.json
 yarn.lock
