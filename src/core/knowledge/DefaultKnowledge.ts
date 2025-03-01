@@ -1,6 +1,4 @@
-import { IMemory } from "src/interfaces/IMemory";
-import { IInteractionLogger } from "src/interfaces/IInteractionLogger";
-import { IKnowledge } from "src/interfaces/IKnowledge";
+import { IMemory,IInteractionLogger,IKnowledge } from "../../interfaces";
 
 export class DefaultKnowledge implements IKnowledge {
     private memory: IMemory;

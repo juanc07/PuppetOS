@@ -7,5 +7,6 @@ packages:
   - "src/server"
   - "src/types"
   - "src/utils"
+  - "src/core" 
   - "plugins/hello-world-plugin"
   - "shared-interfaces"

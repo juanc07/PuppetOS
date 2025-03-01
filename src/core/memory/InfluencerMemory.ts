@@ -1,5 +1,5 @@
 import sqlite3 from "sqlite3";
-import { IMemory } from "src/interfaces/IMemory";
+import { IMemory } from "../../interfaces";
 
 export class InfluencerMemory implements IMemory {
   private db: sqlite3.Database;

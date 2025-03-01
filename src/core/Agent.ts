@@ -5,7 +5,7 @@ import {
 } from "../interfaces";
 import dotenv from "dotenv";
 import { EventHub, eventHub } from "./EventHub";
-import { ActionData, EventPayload} from "src/interfaces/Types"; // Import types
+import { ActionData, EventPayload} from "../interfaces/Types"; // Import types
 
 // Load environment variables from `.env` file
 dotenv.config();

@@ -1,4 +1,3 @@
-// src/interfaces/Types.ts
 export interface ActionData {
     input?: string;
     userId: string;

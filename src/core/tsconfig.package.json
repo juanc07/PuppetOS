@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "dist", // Outputs to src/core/dist/
+    "rootDir": "../", // Root at src/
+    "strict": true,
+    "esModuleInterop": true,
+    "declaration": true,
+    "skipLibCheck": true,
+    "baseUrl": "../"
+  },
+  "include": [
+    "./**/*.ts"         // src/core/*.ts and subdirs
+    //"../interfaces/**/*" // src/interfaces/*.ts and subdirs
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "../server/**/*",
+    "../agents/**/*",
+    "../api/**/*",
+    "../config/**/*",
+    "../platforms/**/*",
+    "../types/**/*",
+    "../utils/**/*"
+  ]
+}

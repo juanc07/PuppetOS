@@ -1,6 +1,5 @@
 import { pipeline } from "@xenova/transformers";
-import { IMemory } from "src/interfaces/IMemory";
-import { IInteractionLogger } from "src/interfaces/IInteractionLogger";
+import { IMemory,IInteractionLogger } from "../../interfaces";
 
 export class InfluencerLogger implements IInteractionLogger {
   private memory: IMemory;

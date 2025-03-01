@@ -1,4 +1,4 @@
-import { EventPayload } from "src/interfaces/Types";
+import { EventPayload } from "../interfaces/Types";
 
 // eventHub.ts
 type EventType = "preAction" | "postAction" | "error";

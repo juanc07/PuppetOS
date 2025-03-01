@@ -1,0 +1,27 @@
+{
+  "name": "puppetos-core",
+  "version": "0.1.0",
+  "description": "Core PuppetOS agent orchestration library",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.package.json",
+    "clean": "rimraf dist",
+    "prepublishOnly": "pnpm clean && pnpm build"
+  },
+  "keywords": ["agents", "orchestration", "ai"],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/uuid": "^10.0.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.3"
+  },
+  "files": [
+    "dist/**/*",
+    "../interfaces/**/*"
+  ]
+}
