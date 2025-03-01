@@ -10,7 +10,7 @@
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "keywords": ["agents", "orchestration", "ai"],
-  "author": "Your Name",
+  "author": "warfreakzplays",  
   "license": "MIT",
   "dependencies": {
     "uuid": "^9.0.1"
