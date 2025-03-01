@@ -7,6 +7,7 @@ import { ruleSets } from "./Rules";
 
 class Orchestrator {
   private agents: Map<string, IAgent> = new Map();
+  private agentInfo: Map<string, { agentId: string; name: string }> = new Map();
   private agentRules: Map<string, ControlRule[]> = new Map();
   private eventHub: EventHub;
 
@@ -61,6 +62,8 @@ class Orchestrator {
     this.agents.set(agentId, agent);
 
     const config = agent.getCharacterInfo();
+    this.agentInfo.set(agentId, { agentId, name: config.name || "Unknown Agent" });
+
     const agentRules = (config.ruleIds || []).map(id => {
       const rule = ruleSets[id];
       if (!rule) throw new Error(`Unknown rule ID: ${id} for agent ${agentId}`);
@@ -77,6 +80,7 @@ class Orchestrator {
     if (agent) {
       await agent.stop();
       this.agents.delete(agentId);
+      this.agentInfo.delete(agentId);
       this.agentRules.delete(agentId);
       console.log(`Stopped agent ${agentId}`);
     }
@@ -142,6 +146,10 @@ class Orchestrator {
 
   public getAgent(agentId: string): IAgent | undefined {
     return this.agents.get(agentId);
+  }
+
+  public getAgentIds(): { agentId: string; name: string }[] {
+    return Array.from(this.agentInfo.values());
   }
 
   public run(): void {

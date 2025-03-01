@@ -1,5 +1,6 @@
 // server/startApiServer.ts
 import express, { Express } from "express";
+import cors from "cors";
 import { Server } from "http";
 import { setupAgentRoutes } from "./routes/agentRoutes";
 import { setupPluginRoutes } from "./routes/pluginRoutes";
@@ -10,6 +11,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app: Express = express();
+
+app.use(cors({ origin: "http://localhost:3001", credentials: true }));
 
 // Middleware must be before routes
 app.use(express.json({ limit: "10kb" })); // Ensure JSON parsing with a reasonable limit
