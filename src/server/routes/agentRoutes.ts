@@ -3,10 +3,14 @@ import { Orchestrator } from "../../core/Orchestrator";
 import { ActionData, ControlRule } from "src/interfaces/Types";
 import { OpenAI } from "openai";
 import dotenv from "dotenv";
+import { AgentRegistry } from "../../core/AgentRegistry";
+import { registryStorage } from "../../storage/RegistryStorage";
+import { AgentConfig } from "../../interfaces";
 
 dotenv.config();
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const agentRegistry = new AgentRegistry(registryStorage);
 
 interface AddRuleRequestBody {
   action: string;
@@ -17,6 +21,16 @@ interface AddRuleRequestBody {
 interface InteractRequestBody {
   message: string;
   agentId: string;
+  userId: string;
+}
+
+interface CreateAgentRequestBody {
+  config: AgentConfig;
+  creatorUserId: string;
+}
+
+interface UpdateAgentRequestBody {
+  config: Partial<AgentConfig>;
 }
 
 class AgentRoutes {
@@ -33,6 +47,12 @@ class AgentRoutes {
     app.post("/api/agents/train", this.train.bind(this));
     app.get("/api/agents/test", this.test.bind(this));
     app.get("/api/agents/getAgentIds", this.getAgentIds.bind(this));
+
+    // AgentRegistry routes
+    app.post("/api/agents", this.createAgent.bind(this));
+    app.get("/api/agents/:agentId", this.getAgent.bind(this));
+    app.get("/api/agents", this.getAllAgents.bind(this));
+    app.put("/api/agents/:agentId", this.updateAgent.bind(this));
   }
 
   private addRule(req: Request, res: Response): void {
@@ -75,14 +95,15 @@ class AgentRoutes {
 
   private async interact(req: Request, res: Response): Promise<void> {
     try {
-      const { message, agentId } = req.body as InteractRequestBody;
+      const { message, agentId, userId } = req.body as InteractRequestBody;
       console.log("check agentId: ", agentId);
-      
+      console.log("check userId: ", userId);
+
       const response = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [{ role: "user", content: message }],
       });
-      
+
       const reply = response.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
       res.json({ reply });
     } catch (error) {
@@ -92,8 +113,9 @@ class AgentRoutes {
 
   private async interactStream(req: Request, res: Response): Promise<void> {
     try {
-      const { message, agentId } = req.body as InteractRequestBody;
+      const { message, agentId, userId } = req.body as InteractRequestBody;
       console.log("Streaming interaction for agentId: ", agentId);
+      console.log("Streaming interaction for userId: ", userId);
 
       // Set headers for Server-Sent Events (SSE)
       res.setHeader("Content-Type", "text/event-stream");
@@ -139,6 +161,54 @@ class AgentRoutes {
       res.status(200).json({ agentInfo });
     } catch (error) {
       res.status(500).json({ success: false, message: `Error retrieving agent IDs: ${(error as Error).message}` });
+    }
+  }
+
+  private async createAgent(req: Request, res: Response): Promise<void> {
+    try {
+      const { config, creatorUserId } = req.body as CreateAgentRequestBody;
+      if (!creatorUserId) {
+        res.status(400).json({ error: "Creator user ID required" });
+        return;
+      }
+      const agentId = await agentRegistry.createAgentRecord(config, creatorUserId);
+      res.json({ agentId });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  }
+
+  private async getAgent(req: Request, res: Response): Promise<void> {
+    try {
+      const { agentId } = req.params;
+      const record = await agentRegistry.getAgentRecord(agentId);
+      if (!record) {
+        res.status(404).json({ error: "Agent not found" });
+        return;
+      }
+      res.json(record);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  }
+
+  private async getAllAgents(req: Request, res: Response): Promise<void> {
+    try {
+      const records = await agentRegistry.getAllAgentRecords();
+      res.json(records);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  }
+
+  private async updateAgent(req: Request, res: Response): Promise<void> {
+    try {
+      const { agentId } = req.params;
+      const { config } = req.body as UpdateAgentRequestBody;
+      await agentRegistry.updateAgentConfig(agentId, config);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }
   }
 }

@@ -1,5 +1,6 @@
 export interface AgentConfig {
     name: string;
+    id: string;
     description: string;
     bio: string;
     mission: string;

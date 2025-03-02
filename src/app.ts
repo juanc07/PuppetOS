@@ -46,7 +46,7 @@ class PuppetOS {
         console.log('Platforms initialized.');
     }
 
-    private async setupAgents(): Promise<{ agentId: string; agentId2: string }> {
+    private async setupAgents(): Promise<{ agentId: string | void; agentId2: string | void }> {
         const characterEnv = process.env.NODE_ENV || "dev";
         console.log("characterEnv", characterEnv);
 
@@ -54,13 +54,13 @@ class PuppetOS {
         console.log("characterConfigPath", characterConfigPath);
         const agent = await AgentFactory.createAgent(characterConfigPath);
         const agentId = await this.orchestrator.startAgent(agent);
-        console.log("Agent initialized:", agent.getCharacterInfo(), "with ID:", agentId);
+        //console.log("Agent initialized:", agent.getCharacterInfo(), "with ID:", agentId);
 
         const character2ConfigPath = `./config/character2.${characterEnv}.json`;
         console.log("character2ConfigPath", character2ConfigPath);
         const agent2 = await AgentFactory.createAgent(character2ConfigPath);
         const agentId2 = await this.orchestrator.startAgent(agent2);
-        console.log("Agent 2 initialized:", agent2.getCharacterInfo(), "with ID:", agentId2);
+        //console.log("Agent 2 initialized:", agent2.getCharacterInfo(), "with ID:", agentId2);
 
         return { agentId, agentId2 };
     }

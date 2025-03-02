@@ -13,6 +13,7 @@ const mockMemory: IMemory = {
 
 const mockConfig: AgentConfig = {
   name: "PuppetOS",
+  id: "1",
   description: "Test AI",
   bio: "I’m a test bot!",
   mission: "To test well",

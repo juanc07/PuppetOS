@@ -5,7 +5,8 @@ import {
 } from "../interfaces";
 import dotenv from "dotenv";
 import { EventHub, eventHub } from "./EventHub";
-import { ActionData, EventPayload} from "../interfaces/Types"; // Import types
+import { ActionData, EventPayload } from "../interfaces/Types"; // Import types
+import { PromptBuilder } from "./PromptBuilder";
 
 // Load environment variables from `.env` file
 dotenv.config();
@@ -19,6 +20,7 @@ export class Agent implements IAgent {
   private config: AgentConfig;
   private eventHub: EventHub;
   private agentId: string;
+  private promptBuilder: PromptBuilder;
   private isRunning: boolean = false;
 
   constructor(
@@ -36,8 +38,9 @@ export class Agent implements IAgent {
     this.stateManager = stateManager;
     this.interactionLogger = interactionLogger;
     this.config = config;
+    this.agentId = config.id;
+    this.promptBuilder = new PromptBuilder(config);
     this.eventHub = eventHubInstance || eventHub || new EventHub();
-    this.agentId = ""; // Initialized empty, set in start()
   }
 
   async start(agentId: string): Promise<void> {
@@ -72,6 +75,13 @@ export class Agent implements IAgent {
     console.log(`Wallets: ${JSON.stringify(this.config.wallets, null, 3)}`);
   }
 
+  async generatePrompt(input: string, userId: string, platform: string): Promise<string> {
+    if (!this.isRunning) throw new Error(`Agent: ${this.config.name} is not running`);
+
+    const additionalData: Partial<ActionData> = { userId, platform };
+    return this.promptBuilder.generatePrompt(input, additionalData);
+  }
+
   async handleInteraction(userId: string, platform: string, input: string): Promise<string> {
     if (!this.isRunning) throw new Error(`Agent: ${this.config.name} is not running`);
 
@@ -89,6 +99,9 @@ export class Agent implements IAgent {
     const finalData = preResult === "allow" || preResult === "override"
       ? { input, userId, platform }
       : (preResult as { newData: ActionData }).newData;
+
+    // Generate the prompt
+    const prompt = await this.generatePrompt(finalData.input || "", finalData.userId, finalData.platform);
 
     await this.stateManager.updateStates(finalData.input || "", userId);
     const affinity = await this.stateManager.getUserAffinity(userId);
@@ -128,7 +141,7 @@ export class Agent implements IAgent {
       }
     }
 
-    await this.interactionLogger.logInteraction(userId, platform, input, response);    
+    await this.interactionLogger.logInteraction(userId, platform, input, response);
 
     const postPayload: EventPayload = {
       agentId: this.getId(),
@@ -202,8 +215,8 @@ export class Agent implements IAgent {
     await this.knowledge.clearKnowledge();
   }
 
-  async addKnowledge(key: string,value:string): Promise<void> {
-    await this.knowledge.addKnowledge(key,value);
+  async addKnowledge(key: string, value: string): Promise<void> {
+    await this.knowledge.addKnowledge(key, value);
   }
 
   async getKnowledgeByKey(key: string): Promise<string[]> {
