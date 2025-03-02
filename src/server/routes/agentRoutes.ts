@@ -29,6 +29,7 @@ class AgentRoutes {
   public setup(app: Express): void {
     app.post("/agents/:agentId/add-rule", this.addRule.bind(this));
     app.post("/api/agents/interact", this.interact.bind(this));
+    app.post("/api/agents/interact-stream", this.interactStream.bind(this)); // New streaming endpoint
     app.post("/api/agents/train", this.train.bind(this));
     app.get("/api/agents/test", this.test.bind(this));
     app.get("/api/agents/getAgentIds", this.getAgentIds.bind(this));
@@ -86,6 +87,41 @@ class AgentRoutes {
       res.json({ reply });
     } catch (error) {
       res.status(500).json({ success: false, message: `Error interacting with OpenAI: ${(error as Error).message}` });
+    }
+  }
+
+  private async interactStream(req: Request, res: Response): Promise<void> {
+    try {
+      const { message, agentId } = req.body as InteractRequestBody;
+      console.log("Streaming interaction for agentId: ", agentId);
+
+      // Set headers for Server-Sent Events (SSE)
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+      res.flushHeaders();
+
+      const stream = await openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [{ role: "user", content: message }],
+        stream: true, // Enable streaming
+      });
+
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content || "";
+        if (content) {
+          // Send each chunk as an SSE event
+          res.write(`data: ${JSON.stringify({ reply: content })}\n\n`);
+        }
+      }
+
+      // Signal the end of the stream
+      res.write("data: [DONE]\n\n");
+      res.end();
+    } catch (error) {
+      console.error("Streaming error:", error);
+      res.write(`data: ${JSON.stringify({ error: (error as Error).message })}\n\n`);
+      res.end();
     }
   }
 
