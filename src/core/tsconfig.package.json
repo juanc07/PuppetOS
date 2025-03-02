@@ -11,8 +11,10 @@
     "baseUrl": "../"
   },
   "include": [
-    "./**/*.ts"         // src/core/*.ts and subdirs
-    //"../interfaces/**/*" // src/interfaces/*.ts and subdirs
+    "*./.ts",
+    "./core/*.ts",
+    "../interfaces/*.ts",
+    "../interfaces/Type/*.ts"
   ],
   "exclude": [
     "node_modules",
@@ -23,6 +25,7 @@
     "../config/**/*",
     "../platforms/**/*",
     "../types/**/*",
-    "../utils/**/*"
+    "../utils/**/*",
+    "../storage/**/*"
   ]
 }
