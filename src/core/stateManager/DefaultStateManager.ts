@@ -1,4 +1,4 @@
-import { IMemory,IStateManager,AgentConfig } from "../../interfaces";
+import { IMemory,IStateManager,AgentConfig } from "../interfaces";
 
 export class DefaultStateManager implements IStateManager {
   private memory: IMemory;

@@ -4,7 +4,7 @@ import { DefaultKnowledge } from './knowledge/DefaultKnowledge';
 import { TrainingSystem } from './trainingSystem/TrainingSystem';
 import { DefaultStateManager } from './stateManager/DefaultStateManager';
 import { InfluencerLogger } from './logger/InfluencerLogger';
-import { AgentConfig } from "../interfaces";
+import { AgentConfig } from "./interfaces";
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';

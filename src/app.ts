@@ -6,7 +6,7 @@ import { PluginManager } from './core/pluginSystem/PluginManager';
 import { PlatformManager } from './platforms/PlatformManager';
 import { AgentFactory } from './core/AgentFactory';
 import { Orchestrator } from "./core/Orchestrator";
-import { ActionData, ControlRule } from './interfaces/Types';
+import { ActionData, ControlRule } from './core/interfaces/Types';
 
 // Load environment variables from .env file
 dotenv.config();

@@ -2,19 +2,19 @@
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
-    "outDir": "dist", // Outputs to src/core/dist/
-    "rootDir": "../", // Root at src/
+    "outDir": "dist",          // Outputs to puppetos/src/core/dist/
+    "rootDir": ".",            // Root at puppetos/src/core/
     "strict": true,
     "esModuleInterop": true,
     "declaration": true,
     "skipLibCheck": true,
-    "baseUrl": "../"
+    "baseUrl": "."            // Relative to puppetos/src/core/
   },
   "include": [
-    "*./.ts",
-    "./core/*.ts",
-    "../interfaces/*.ts",
-    "../interfaces/Type/*.ts"
+    "*.ts",                  // e.g., index.ts in core/
+    "core/*.ts",             // Files directly in core/
+    "interfaces/*.ts",       // Files in core/interfaces/
+    "interfaces/Types/*.ts"  // Files in core/interfaces/Types/ (if exists)
   ],
   "exclude": [
     "node_modules",
@@ -26,6 +26,6 @@
     "../platforms/**/*",
     "../types/**/*",
     "../utils/**/*",
-    "../storage/**/*"
+    "storage/**/*"
   ]
 }

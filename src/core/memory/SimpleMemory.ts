@@ -1,5 +1,5 @@
 import * as sqlite3 from "sqlite3";
-import { IMemory } from "../../interfaces";
+import { IMemory } from "../interfaces";
 
 export class SimpleMemory implements IMemory {
   private db: sqlite3.Database;

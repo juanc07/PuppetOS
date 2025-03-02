@@ -1,11 +1,11 @@
 {
   "name": "puppetos-core",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Core PuppetOS agent orchestration library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.package.json && shx cp -r ../interfaces dist/",
+    "build": "tsc -p tsconfig.package.json",
     "clean": "rimraf dist",
     "prepublishOnly": "pnpm clean && pnpm build"
   },

@@ -1,7 +1,7 @@
 // puppetos/core/AgentRegistry.ts
 import { v4 as uuidv4 } from "uuid";
-import { RegistryStorage, AgentRecord } from "../interfaces/Types";
-import { AgentConfig} from "../interfaces";
+import { RegistryStorage, AgentRecord } from "./interfaces/Types";
+import { AgentConfig} from "./interfaces";
 
 export class AgentRegistry {
   private storage: RegistryStorage;

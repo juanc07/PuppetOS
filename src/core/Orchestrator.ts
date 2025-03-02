@@ -1,11 +1,11 @@
 // orchestrator.ts
 import { v4 as uuidv4 } from "uuid";
 import { EventHub, eventHub } from "./EventHub";
-import { IAgent } from "../interfaces";
-import { ActionData, EventPayload, ControlRule } from "../interfaces/Types";
+import { IAgent } from "./interfaces";
+import { ActionData, EventPayload, ControlRule } from "./interfaces/Types";
 import { ruleSets } from "./Rules";
 import { AgentRegistry } from "./AgentRegistry";
-import { registryStorage } from "../storage/RegistryStorage";
+import { registryStorage } from "./storage/RegistryStorage";
 
 class Orchestrator {
   private agents: Map<string, IAgent> = new Map();

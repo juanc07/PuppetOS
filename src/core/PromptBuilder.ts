@@ -1,6 +1,6 @@
 // PromptBuilder.ts
-import { AgentConfig } from "../interfaces";
-import { ActionData } from "../interfaces/Types";
+import { AgentConfig } from "./interfaces";
+import { ActionData } from "./interfaces/Types";
 
 export class PromptBuilder {
   constructor(private config: AgentConfig) {}

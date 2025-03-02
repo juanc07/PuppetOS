@@ -1,6 +1,6 @@
 import { DefaultKnowledge } from "../../src/core/knowledge/DefaultKnowledge";
-import { IMemory } from "../../src/interfaces/IMemory";
-import { IInteractionLogger } from "../../src/interfaces/IInteractionLogger";
+import { IMemory } from "../../src/core/interfaces/IMemory";
+import { IInteractionLogger } from "../../src/core/interfaces/IInteractionLogger";
 
 const mockMemory: IMemory = {
   setShortTerm: jest.fn(),

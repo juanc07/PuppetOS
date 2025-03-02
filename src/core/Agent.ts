@@ -2,10 +2,10 @@
 import {
   IMemory, IKnowledge, ITrainingSystem,
   IStateManager, AgentConfig, IInteractionLogger, IAgent
-} from "../interfaces";
+} from "./interfaces";
 import dotenv from "dotenv";
 import { EventHub, eventHub } from "./EventHub";
-import { ActionData, EventPayload } from "../interfaces/Types"; // Import types
+import { ActionData, EventPayload } from "./interfaces/Types"; // Import types
 import { PromptBuilder } from "./PromptBuilder";
 
 // Load environment variables from `.env` file

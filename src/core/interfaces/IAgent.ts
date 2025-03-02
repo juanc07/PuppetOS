@@ -1,5 +1,5 @@
-import { AgentConfig } from "../interfaces/AgentConfig";
-import { EventHub } from "../core/EventHub";
+import { AgentConfig } from "./AgentConfig";
+import { EventHub } from "../EventHub";
 
 export interface IAgent {
     getId(): string;

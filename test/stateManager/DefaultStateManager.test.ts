@@ -1,6 +1,6 @@
 import { DefaultStateManager } from "../../src/core/stateManager/DefaultStateManager";
-import { IMemory } from "../../src/interfaces/IMemory";
-import { AgentConfig } from "../../src/interfaces/AgentConfig";
+import { IMemory } from "../../src/core/interfaces/IMemory";
+import { AgentConfig } from "../../src/core/interfaces/AgentConfig";
 
 const mockMemory: IMemory = {
   setShortTerm: jest.fn(),

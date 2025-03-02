@@ -1,4 +1,4 @@
-import { ITrainingSystem } from "../../interfaces";
+import { ITrainingSystem } from "../interfaces";
 
 export type TrainingData = {
     input: string;

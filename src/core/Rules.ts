@@ -1,5 +1,5 @@
 // src/rules.ts
-import { ActionData, ControlRule } from "../interfaces/Types";
+import { ActionData, ControlRule } from "./interfaces/Types";
 
 export const ruleSets: Record<string, ControlRule> = {
   // For Agent 1 (Zeek)

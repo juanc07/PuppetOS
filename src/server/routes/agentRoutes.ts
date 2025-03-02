@@ -1,11 +1,11 @@
 import { Express, Request, Response } from "express";
 import { Orchestrator } from "../../core/Orchestrator";
-import { ActionData, ControlRule } from "src/interfaces/Types";
+import { ActionData, ControlRule } from "src/core/interfaces/Types";
 import { OpenAI } from "openai";
 import dotenv from "dotenv";
 import { AgentRegistry } from "../../core/AgentRegistry";
-import { registryStorage } from "../../storage/RegistryStorage";
-import { AgentConfig } from "../../interfaces";
+import { registryStorage } from "../../core/storage/RegistryStorage";
+import { AgentConfig } from "../../core/interfaces";
 
 dotenv.config();
 
