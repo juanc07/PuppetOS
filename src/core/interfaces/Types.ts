@@ -36,4 +36,6 @@ export interface RegistryStorage {
   getAgent(agentId: string): Promise<AgentRecord | undefined>;
   getAllAgents(): Promise<AgentRecord[]>;
   updateAgent(agentId: string, config: AgentConfig): Promise<void>;
+  deleteAgent(agentId: string): Promise<void>;
+  deleteAllAgents(): Promise<void>;
 }

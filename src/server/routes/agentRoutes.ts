@@ -33,6 +33,11 @@ interface UpdateAgentRequestBody {
   config: Partial<AgentConfig>;
 }
 
+interface DeleteAgentRequestBody {  
+  userId: string;
+}
+
+
 class AgentRoutes {
   private orchestrator: Orchestrator;
 
@@ -53,6 +58,8 @@ class AgentRoutes {
     app.get("/api/agents/:agentId", this.getAgent.bind(this));
     app.get("/api/agents", this.getAllAgents.bind(this));
     app.put("/api/agents/:agentId", this.updateAgent.bind(this));
+    app.delete("/api/agents/:agentId", this.deleteAgent.bind(this)); // New
+    app.delete("/api/agents", this.deleteAllAgents.bind(this));
   }
 
   private addRule(req: Request, res: Response): void {
@@ -211,6 +218,54 @@ class AgentRoutes {
       res.status(400).json({ error: error instanceof Error ? error.message : "Unknown error" });
     }
   }
+
+  private async deleteAgent(req: Request, res: Response): Promise<void> {
+    try {
+      const { agentId } = req.params;
+      const { userId } = req.body as DeleteAgentRequestBody;
+
+      if (!agentId || !userId) {
+        res.status(400).json({ error: "Both agentId and userId are required" });
+        return;
+      }
+
+      const record = await agentRegistry.getAgentRecord(agentId);
+      if (!record) {
+        res.status(404).json({ error: "Agent not found" });
+        return;
+      }
+
+      // Optional: Check if userId matches creatorUserId for authorization
+      if (record.creatorUserId !== userId) {
+        res.status(403).json({ error: "Unauthorized to delete this agent" });
+        return;
+      }
+
+      await agentRegistry.deleteAgent(agentId);
+      res.json({ success: true, message: `Agent ${agentId} deleted by user ${userId}` });
+    } catch (error) {
+      res.status(400).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  }
+
+  private async deleteAllAgents(req: Request, res: Response): Promise<void> {
+    try {
+      const { userId } = req.body as DeleteAgentRequestBody;
+
+      if (!userId) {
+        res.status(400).json({ error: "UserId is required" });
+        return;
+      }
+
+      // Optional: Add authorization logic (e.g., only admins can delete all)
+      await agentRegistry.deleteAllAgents();
+      res.json({ success: true, message: `All agents deleted by user ${userId}` });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  }
+
+
 }
 
 export function setupAgentRoutes(app: Express, orchestrator: Orchestrator): void {

@@ -65,6 +65,14 @@ export class RegistryStorage {
       [JSON.stringify(config), agentId]
     );
   }
+
+  async deleteAgent(agentId: string): Promise<void> {
+    await this.db.run("DELETE FROM agents WHERE agent_id = ?", [agentId]);
+  }
+
+  async deleteAllAgents(): Promise<void> {
+    await this.db.run("DELETE FROM agents");
+  }
 }
 
 export const registryStorage = new RegistryStorage();

@@ -13,7 +13,7 @@ export interface AgentConfig {
     wallets: { solana: string; ethereum: string; bitcoin: string };
     knowledge: { type: string; data: string[] };
     personality: {
-      tone: "friendly" | "sassy" | "formal" | "casual";
+      tone: "friendly" | "sassy" | "formal" | "casual" | "warm and uplifting";
       humor: boolean;
       formality: "casual" | "formal";
       catchphrase?: string;
